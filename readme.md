@@ -361,124 +361,129 @@ Configuration
 
 Python-dotenv
 
-📁 Project Structure
+## Project Structure
 
+```text
 Bugify/
-│
 ├── app/
 │   ├── __init__.py
-│   ├── main.py
-│   └── config.py
-│
+│   ├── config.py
+│   └── main.py
 ├── agents/
-│   │
+│   ├── __init__.py
 │   ├── diagnosis/
+│   │   ├── __init__.py
 │   │   ├── agent.py
 │   │   └── subagents/
+│   │       ├── __init__.py
+│   │       ├── bug_classifier.py
 │   │       ├── error_parser.py
-│   │       ├── log_analyzer.py
-│   │       └── bug_classifier.py
-│   │
+│   │       └── log_analyzer.py
 │   ├── code_analysis/
+│   │   ├── __init__.py
 │   │   ├── agent.py
 │   │   └── subagents/
-│   │       ├── repository_explorer.py
+│   │       ├── __init__.py
 │   │       ├── ast_analyzer.py
-│   │       └── dependency_analyzer.py
-│   │
-│   ├── research/
-│   │   ├── agent.py
-│   │   └── subagents/
-│   │       ├── documentation_retriever.py
-│   │       ├── issue_retriever.py
-│   │       └── knowledge_synthesizer.py
-│   │
+│   │       ├── dependency_analyzer.py
+│   │       └── repository_explorer.py
 │   ├── fix/
+│   │   ├── __init__.py
 │   │   ├── agent.py
 │   │   └── subagents/
+│   │       ├── __init__.py
 │   │       ├── patch_generator.py
 │   │       ├── patch_reviewer.py
 │   │       └── refactoring_agent.py
-│   │
+│   ├── research/
+│   │   ├── __init__.py
+│   │   ├── agent.py
+│   │   └── subagents/
+│   │       ├── __init__.py
+│   │       ├── documentation_retriever.py
+│   │       ├── issue_retriever.py
+│   │       └── knowledge_synthesizer.py
 │   └── verification/
+│       ├── __init__.py
 │       ├── agent.py
 │       └── subagents/
-│           ├── test_executor.py
+│           ├── __init__.py
 │           ├── regression_tester.py
-│           └── runtime_validator.py
-│
+│           ├── runtime_validator.py
+│           └── test_executor.py
+├── code_analysis/
+│   ├── __init__.py
+│   ├── dependency.py
+│   ├── file_utils.py
+│   ├── parser.py
+│   └── repository.py
+├── knowledge/
+│   ├── code_patterns/
+│   ├── documents/
+│   ├── github_issues/
+│   └── solved_bugs/
+├── llm/
+│   ├── __init__.py
+│   ├── groq_client.py
+│   ├── model_registry.py
+│   └── prompts.py
 ├── orchestrator/
+│   ├── __init__.py
 │   ├── graph.py
 │   ├── nodes.py
 │   ├── router.py
 │   └── state.py
-│
-├── llm/
-│   ├── groq_client.py
-│   ├── prompts.py
-│   └── model_registry.py
-│
+├── prompts/
+│   ├── code_analysis/
+│   ├── diagnosis/
+│   ├── fix/
+│   ├── research/
+│   └── verification/
 ├── rag/
+│   ├── __init__.py
+│   ├── collections.py
 │   ├── embeddings.py
-│   ├── qdrant_client.py
-│   ├── retriever.py
 │   ├── ingestion.py
-│   └── collections.py
-│
-├── code_analysis/
-│   ├── parser.py
-│   ├── repository.py
-│   ├── dependency.py
-│   └── file_utils.py
-│
+│   ├── qdrant_client.py
+│   └── retriever.py
 ├── sandbox/
+│   ├── __init__.py
 │   ├── docker_manager.py
 │   ├── executor.py
-│   ├── test_runner.py
-│   └── security.py
-│
+│   ├── security.py
+│   └── test_runner.py
+├── schemas/
+│   ├── __init__.py
+│   ├── agent.py
+│   ├── bug.py
+│   ├── patch.py
+│   └── test.py
+├── scripts/
+│   ├── create_collection.py
+│   ├── ingest_knowledge.py
+│   └── run_bugify.py
+├── tests/
+│   ├── agent_tests/
+│   ├── benchmark/
+│   ├── integration/
+│   └── unit/
 ├── tools/
+│   ├── __init__.py
 │   ├── file_tools.py
 │   ├── git_tools.py
 │   ├── shell_tools.py
 │   └── test_tools.py
-│
-├── prompts/
-│   ├── diagnosis/
-│   ├── code_analysis/
-│   ├── research/
-│   ├── fix/
-│   └── verification/
-│
-├── schemas/
-│   ├── bug.py
-│   ├── patch.py
-│   ├── test.py
-│   └── agent.py
-│
-├── knowledge/
-│   ├── documents/
-│   ├── github_issues/
-│   ├── solved_bugs/
-│   └── code_patterns/
-│
-├── tests/
-│   ├── unit/
-│   ├── integration/
-│   ├── agent_tests/
-│   └── benchmark/
-│
-├── scripts/
-│   ├── ingest_knowledge.py
-│   ├── create_collection.py
-│   └── run_bugify.py
-│
-├── .env.example
+├── .env
 ├── .gitignore
-├── requirements.txt
-├── README.md
-└── LICENSE
+├── readme.md
+└── requirements.txt
+```
 
+Recommended repository additions:
+
+- `.env.example` for documenting required environment variable names without secrets.
+- `LICENSE` to make the project's usage and redistribution terms explicit.
+- Rename `readme.md` to `README.md` if you want GitHub's conventional casing.
 ⚙️ Installation
 
 Prerequisites
@@ -798,6 +803,8 @@ No license has been selected for this project yet.
 
 Autonomous Multi-Agent AI Debugging System
 Python · LangGraph · LangChain · Groq · Qdrant · Docker · FastAPI · Pytest · LangSmith
+
+
 
 
 
