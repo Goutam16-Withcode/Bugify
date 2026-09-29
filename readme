@@ -1,0 +1,250 @@
+﻿# Bugify
+
+> An agentic debugging workspace that turns a bug report, traceback, and repository into a diagnosed cause, a reviewed patch, and verified test results.
+
+Bugify is designed as a modular software-debugging pipeline. Specialized agents handle diagnosis, repository and code analysis, research, patch generation, and verification while a shared state object keeps the investigation coherent from intake to final response.
+
+## Project Status
+
+This repository is currently an architectural scaffold. The state contract, diagnosis agent, diagnosis subagents, project layout, and dependency choices are present; the application entry point, LangGraph orchestration, code-analysis flow, research flow, fix flow, verification flow, and RAG integrations still need implementation.
+
+The diagrams below describe the intended system boundary and control flow. They are also the design contract for completing the remaining modules.
+
+## Why Bugify?
+
+Debugging usually requires moving between several disconnected activities:
+
+- Parse the reported error and identify its likely category.
+- Locate relevant files, symbols, dependencies, and code paths.
+- Compare the failure with documentation, known issues, and solved examples.
+- Generate a minimal patch and review it for correctness and scope.
+- Run focused tests, regression checks, and optional runtime validation.
+
+Bugify brings those activities into one repeatable workflow with explicit intermediate artifacts and a verification gate before a fix is reported as complete.
+
+## Architecture
+
+### System Architecture
+
+```mermaid
+flowchart LR
+    User[Developer / CI] --> Input[Bug report\ntraceback\nrepository path]
+    Input --> App[Application API\napp/main.py]
+    App --> Graph[Workflow graph\norchestrator/]
+
+    Graph --> Diagnosis[Diagnosis agent]
+    Graph --> Analysis[Code analysis agent]
+    Graph --> Research[Research agent]
+    Graph --> Fix[Fix agent]
+    Graph --> Verification[Verification agent]
+
+    Diagnosis --> State[(BugifyState)]
+    Analysis --> State
+    Research --> State
+    Fix --> State
+    Verification --> State
+
+    Analysis --> Repo[Target repository]
+    Research --> Knowledge[(Knowledge base\nQdrant / embeddings)]
+    Fix --> Sandbox[Sandbox\nDocker + security]
+    Verification --> Sandbox
+    Verification --> Tests[Test runner]
+
+    State --> Response[Final diagnosis, patch,\nand verification result]
+    Response --> User
+```
+
+### Agent Responsibilities
+
+| Layer | Responsibility | Main location |
+| --- | --- | --- |
+| Application | Accept input, configure dependencies, and return the final result | `app/` |
+| Orchestration | Build the graph, route between stages, and manage iteration | `orchestrator/` |
+| Diagnosis | Parse tracebacks and logs, then classify the bug | `agents/diagnosis/` |
+| Code analysis | Explore repositories, inspect ASTs, and map dependencies | `agents/code_analysis/`, `code_analysis/` |
+| Research | Retrieve documentation, GitHub issues, and solved bug patterns | `agents/research/`, `knowledge/`, `rag/` |
+| Fix | Generate, review, and optionally refactor a patch | `agents/fix/` |
+| Verification | Execute tests, regression checks, and runtime validation | `agents/verification/`, `sandbox/` |
+| Contracts | Define shared bug, patch, test, and agent schemas | `schemas/` |
+| Tools | Provide file, Git, shell, and test operations | `tools/` |
+
+## End-to-End Workflow
+
+```mermaid
+flowchart TD
+    Start([Start]) --> Intake[Collect problem, traceback,\nlogs, and repository path]
+    Intake --> Diagnose[Parse error and analyze logs]
+    Diagnose --> Classify[Classify type, severity,\nand confidence]
+    Classify --> Explore[Explore relevant files, AST,\nand dependencies]
+    Explore --> Search[Retrieve matching documentation,\nissues, and solved patterns]
+    Search --> Hypothesize[Build root-cause hypotheses]
+    Hypothesize --> Generate[Generate a minimal patch]
+    Generate --> Review{Patch review passes?}
+    Review -- No --> Generate
+    Review -- Yes --> Execute[Run focused tests in sandbox]
+    Execute --> Passed{Tests pass?}
+    Passed -- No --> Iterate{Iteration limit reached?}
+    Iterate -- No --> Hypothesize
+    Iterate -- Yes --> ReportFailure[Report unresolved failure\nand evidence]
+    Passed -- Yes --> Regression[Run regression and runtime checks]
+    Regression --> ReportSuccess[Return diagnosis, patch,\nand verification evidence]
+    ReportFailure --> End([End])
+    ReportSuccess --> End
+```
+
+## Shared State Contract
+
+The workflow is intended to pass one `BugifyState` object between graph nodes. Its fields represent the durable investigation record:
+
+```text
+problem             Original bug description
+traceback           Reported exception or stack trace
+repository_path     Target repository to inspect
+bug_type            Classified bug category
+relevant_files      Files connected to the failure
+hypotheses          Candidate root causes
+root_cause          Selected explanation
+retrieved_context   Research results used by the investigation
+proposed_patches    Candidate fixes
+test_output         Test and validation output
+tests_passed        Verification gate
+iteration           Number of diagnosis/fix attempts
+final_answer        User-facing result
+```
+
+### State Transition Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Intake
+    Intake --> Diagnosis
+    Diagnosis --> CodeAnalysis
+    CodeAnalysis --> Research
+    Research --> FixGeneration
+    FixGeneration --> PatchReview
+    PatchReview --> FixGeneration: rejected
+    PatchReview --> Verification: approved
+    Verification --> Diagnosis: tests fail and retries remain
+    Verification --> Failed: retry limit reached
+    Verification --> Completed: tests pass
+    Completed --> [*]
+    Failed --> [*]
+```
+
+## Repository Layout
+
+```text
+Bugify/
+├── app/                    Application entry point and configuration
+├── agents/
+│   ├── diagnosis/          Traceback, log, and bug classification
+│   ├── code_analysis/      Repository, AST, and dependency analysis
+│   ├── research/           Documentation, issue, and knowledge retrieval
+│   ├── fix/                Patch generation, review, and refactoring
+│   └── verification/       Test execution and runtime validation
+├── code_analysis/          Shared repository-analysis utilities
+├── knowledge/              Documents, issue notes, solved bugs, and patterns
+├── llm/                    Provider clients, model registry, and prompts
+├── orchestrator/           Graph, nodes, state, and routing
+├── prompts/                Prompt templates grouped by workflow stage
+├── rag/                    Embeddings, ingestion, retrieval, and collections
+├── sandbox/                Docker execution and security controls
+├── schemas/                Pydantic and typed workflow contracts
+├── scripts/                Knowledge ingestion and local runner scripts
+├── tests/                  Unit, integration, agent, and benchmark tests
+└── tools/                  File, Git, shell, and test helpers
+```
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.10 or newer
+- Docker Desktop, for sandboxed execution
+- An LLM provider API key supported by the selected client
+- A vector store configuration when RAG retrieval is enabled
+
+### Installation
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+Create a local `.env` file for provider and infrastructure settings. Keep secrets out of source control. The exact variable names should be centralized in `app/config.py` as the configuration layer is implemented.
+
+### Running Tests
+
+```powershell
+python -m pytest -q
+```
+
+Run a focused test while developing a stage:
+
+```powershell
+python -m pytest tests/unit/test_diagnosis_agent.py -v
+```
+
+### Running Bugify
+
+The intended local runner is `scripts/run_bugify.py`. Until the application entry point and graph are implemented, use the diagnosis unit tests as the currently available executable slice.
+
+## Configuration and Integrations
+
+The dependency set anticipates these integrations:
+
+- **LLM providers:** OpenAI, Anthropic, or Groq through `llm/`.
+- **Workflow orchestration:** LangGraph with checkpoint support.
+- **Code understanding:** Python AST tooling, Tree-sitter, and Astroid.
+- **Knowledge retrieval:** sentence-transformers plus Chroma or FAISS; Qdrant is represented by the repository client module.
+- **Repository operations:** GitPython and the helpers in `tools/`.
+- **Isolation:** Docker-backed execution through `sandbox/`.
+- **API serving:** FastAPI and Uvicorn when the application surface is enabled.
+
+Keep provider-specific code behind the existing client and registry modules so agents remain testable and interchangeable.
+
+## Safety Boundaries
+
+Bugify is intended to inspect and test user-provided repositories. Any generated patch should be:
+
+1. Limited to the requested repository and relevant files.
+2. Reviewed before it is applied.
+3. Tested in an isolated sandbox whenever execution is required.
+4. Reported with the exact test command and output used for verification.
+
+The `sandbox/security.py` and `sandbox/docker_manager.py` modules are the natural enforcement point for filesystem, process, network, resource, and timeout restrictions.
+
+## Testing Strategy
+
+| Test layer | Purpose |
+| --- | --- |
+| Unit | Validate parsers, classifiers, analyzers, schemas, and helpers in isolation |
+| Integration | Validate graph transitions and agent-to-agent state updates |
+| Agent tests | Validate prompt/model-backed behavior with controlled fixtures |
+| Regression | Re-run the original failure and nearby affected behavior |
+| Benchmark | Compare diagnosis, patch quality, and verification outcomes across known bugs |
+
+Every completed fix should preserve the original failing case as a regression test where practical.
+
+## Implementation Roadmap
+
+- [x] Define the initial repository structure.
+- [x] Define the shared `BugifyState` contract.
+- [x] Implement the diagnosis agent's initial composition of parser, log analyzer, and classifier.
+- [ ] Implement the application entry point and configuration loading.
+- [ ] Build the LangGraph workflow and retry routing.
+- [ ] Complete repository, AST, and dependency analysis.
+- [ ] Implement RAG ingestion and retrieval against the chosen vector store.
+- [ ] Implement patch generation, review, and safe application.
+- [ ] Implement sandboxed test execution and regression verification.
+- [ ] Add integration tests for the complete workflow.
+
+## Contributing
+
+Keep changes focused on one workflow stage, add or update the narrowest relevant test, and preserve the state contract between agents. New tools should have explicit input boundaries and should be callable independently of the LLM so they can be tested deterministically.
+
+## License
+
+No license has been selected for this project yet.
