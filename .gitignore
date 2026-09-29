@@ -1,0 +1,135 @@
+# ================================
+# Python
+# ================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual Environment
+.venv/
+venv/
+env/
+ENV/
+
+# ================================
+# Environment & Secrets
+# ================================
+.env
+.env.*
+!.env.example
+
+# API Keys / Credentials
+*.pem
+*.key
+credentials.json
+secrets.json
+
+# ================================
+# Jupyter
+# ================================
+.ipynb_checkpoints/
+
+# ================================
+# IDE / Editors
+# ================================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ================================
+# Testing / Coverage
+# ================================
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# ================================
+# Type Checking / Linters
+# ================================
+.mypy_cache/
+.pyright/
+.ruff_cache/
+
+# ================================
+# Build / Distribution
+# ================================
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# ================================
+# Logs
+# ================================
+*.log
+logs/
+
+# ================================
+# Bugify Runtime Data
+# ================================
+tmp/
+temp/
+cache/
+.cache/
+outputs/
+artifacts/
+
+# Sandbox generated files
+sandbox/workspace/
+sandbox/output/
+
+# ================================
+# RAG / Vector Databases
+# ================================
+chroma_db/
+chroma/
+vectorstore/
+faiss_index/
+*.faiss
+*.index
+
+# ================================
+# Model / Dataset Files
+# ================================
+models/
+checkpoints/
+weights/
+datasets/
+*.pt
+*.pth
+*.bin
+*.safetensors
+
+# ================================
+# OS Files
+# ================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ================================
+# Local Database
+# ================================
+*.db
+*.sqlite
+*.sqlite3
+
+# ================================
+# Docker
+# ================================
+.docker/
+
+# ================================
+# Generated Bug Patches
+# ================================
+patches/
+generated_patches/
+
+# ================================
+# Local Configuration
+# ================================
+config.local.*
