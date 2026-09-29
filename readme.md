@@ -30,101 +30,98 @@ Bugify combines these activities into one agentic debugging workflow.
 
 The system uses specialized AI agents coordinated through LangGraph, while a shared state keeps the complete debugging investigation consistent from diagnosis to verification.
 
-🏗️ Architecture
+## Architecture
 
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                              DEVELOPER / CI                                  │
-│                                                                              │
-│       Bug Report + Traceback + Logs + Local Repository / Codebase           │
-└────────────────────────────────────┬─────────────────────────────────────────┘
-                                     │
-                                     ▼
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                              FASTAPI API                                     │
-│                         Application / Input Layer                            │
-└────────────────────────────────────┬─────────────────────────────────────────┘
-                                     │
-                                     ▼
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                         LANGGRAPH ORCHESTRATOR                               │
-│                                                                              │
-│                         ┌─────────────────────┐                              │
-│                         │     BugifyState     │                              │
-│                         │                     │                              │
-│                         │ problem             │                              │
-│                         │ traceback           │                              │
-│                         │ bug_type            │                              │
-│                         │ relevant_files      │                              │
-│                         │ hypotheses          │                              │
-│                         │ root_cause          │                              │
-│                         │ retrieved_context   │                              │
-│                         │ proposed_patches    │                              │
-│                         │ test_output         │                              │
-│                         │ tests_passed        │                              │
-│                         │ iteration           │                              │
-│                         └─────────────────────┘                              │
-└───────────────┬─────────────────┬─────────────────┬──────────────────────────┘
-                │                 │                 │
-                ▼                 ▼                 ▼
-      ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-      │   DIAGNOSIS     │ │ CODE ANALYSIS   │ │  RESEARCH / RAG │
-      │      AGENT      │ │      AGENT      │ │      AGENT      │
-      │                 │ │                 │ │                 │
-      │ • Error Parser  │ │ • Repo Explorer │ │ • Docs Retriever│
-      │ • Log Analyzer  │ │ • AST Analyzer  │ │ • Issue Retriever│
-      │ • Bug Classifier│ │ • Dependency    │ │ • Synthesizer   │
-      │                 │ │   Analyzer      │ │                 │
-      └────────┬────────┘ └────────┬────────┘ └────────┬────────┘
-               │                   │                   │
-               │                   ▼                   ▼
-               │          ┌────────────────┐  ┌──────────────────┐
-               │          │ Target         │  │ Qdrant Cloud     │
-               │          │ Repository     │  │ Vector Database  │
-               │          │                │  │                  │
-               │          │ AST / Tree-    │  │ Embeddings +     │
-               │          │ sitter / Git   │  │ Retrieved Context│
-               │          └────────────────┘  └──────────────────┘
-               │
-               └──────────────────────┬───────────────────────────────────────
-                                      │
-                                      ▼
-                            ┌─────────────────────┐
-                            │      FIX AGENT      │
-                            │                     │
-                            │ • Patch Generator   │
-                            │ • Patch Reviewer    │
-                            │ • Refactoring Agent │
-                            └──────────┬──────────┘
-                                       │
-                                       ▼
-                            ┌─────────────────────┐
-                            │ VERIFICATION AGENT │
-                            │                     │
-                            │ • Test Executor     │
-                            │ • Regression Tester │
-                            │ • Runtime Validator │
-                            └──────────┬──────────┘
-                                       │
-                         ┌─────────────┴─────────────┐
-                         │                           │
-                       FAIL                         PASS
-                         │                           │
-                         ▼                           ▼
-                ┌─────────────────┐        ┌────────────────────┐
-                │ Retry / Re-run  │        │   VERIFIED FIX     │
-                │ Diagnosis → Fix │        │                    │
-                └────────┬────────┘        │ Diagnosis + Patch  │
-                         │                 │ + Test Evidence    │
-                         └──────────────►  └────────────────────┘
+Bugify separates workflow control, specialized reasoning, repository access, knowledge retrieval, and isolated verification. The orchestrator passes a shared `BugifyState` through each stage so every agent can build on the same evidence.
 
-       ┌────────────────────────────────────────────────────────────────┐
-       │                         INFRASTRUCTURE                          │
-       │                                                                │
-       │   Groq LLM  │  Qdrant  │  Sentence Transformers  │  Docker   │
-       │   LangSmith │  GitPython │ Tree-sitter │ Pytest │ FastAPI     │
-       └────────────────────────────────────────────────────────────────┘
+### Runtime Architecture
 
-🤖 Multi-Agent System
+```mermaid
+flowchart TB
+    client([Developer or CI]) -->|bug report, traceback, logs, repository path| api
+
+    subgraph APP[Application Layer]
+        api[FastAPI API]
+        config[Configuration]
+        api --> config
+    end
+
+    api --> orchestrator
+
+    subgraph CORE[Orchestration Layer]
+        orchestrator[LangGraph Orchestrator]
+        state[(BugifyState)]
+        router{Route by result}
+        orchestrator <--> state
+        orchestrator --> router
+    end
+
+    router --> diagnosis
+    router --> analysis
+    router --> research
+
+    subgraph AGENTS[Specialized Agents]
+        diagnosis[Diagnosis Agent<br/>Error Parser<br/>Log Analyzer<br/>Bug Classifier]
+        analysis[Code Analysis Agent<br/>Repository Explorer<br/>AST Analyzer<br/>Dependency Analyzer]
+        research[Research / RAG Agent<br/>Documentation Retriever<br/>Issue Retriever<br/>Knowledge Synthesizer]
+        fix[Fix Agent<br/>Patch Generator<br/>Patch Reviewer<br/>Refactoring Agent]
+        verification[Verification Agent<br/>Test Executor<br/>Regression Tester<br/>Runtime Validator]
+    end
+
+    diagnosis --> state
+    analysis --> state
+    research --> state
+    state --> fix
+    fix -->|reviewed patch| verification
+    verification -->|tests pass| success([Verified Fix])
+    verification -->|tests fail and retries remain| router
+    verification -->|retry limit reached| failure([Unresolved Failure])
+
+    analysis --> repository[(Target Repository)]
+    research --> knowledge[(Knowledge Base)]
+    verification --> sandbox[Isolated Docker Sandbox]
+```
+
+### Infrastructure and Integrations
+
+```mermaid
+flowchart LR
+    subgraph BUGIFY[Bugify Runtime]
+        api[FastAPI]
+        graph[LangGraph]
+        agents[Agent modules]
+        tools[File, Git, shell, and test tools]
+        api --> graph --> agents
+        agents --> tools
+    end
+
+    llm[Groq / OpenAI / Anthropic] --> agents
+    embeddings[Sentence Transformers] --> rag[RAG Retriever]
+    qdrant[(Qdrant Vector Database)] <--> rag
+    rag --> agents
+    git[GitPython] --> tools
+    parser[Tree-sitter / AST tooling] --> tools
+    docker[Docker] --> sandbox[Sandbox Executor]
+    sandbox --> tools
+    pytest[Pytest] --> sandbox
+    langsmith[LangSmith] -. tracing .-> graph
+```
+
+### Workflow Outcomes
+
+```mermaid
+flowchart LR
+    start([Input]) --> diagnose[Diagnose]
+    diagnose --> analyze[Analyze repository]
+    analyze --> research[Retrieve context]
+    research --> patch[Generate and review patch]
+    patch --> verify[Run isolated verification]
+    verify -->|pass| complete([Diagnosis + patch + evidence])
+    verify -->|fail| retry{Retries left?}
+    retry -->|yes| diagnose
+    retry -->|no| blocked([Report failure and evidence])
+```
+## Multi-Agent System
 
 Bugify contains five primary agents, each responsible for a distinct stage of the debugging lifecycle.
 
@@ -220,68 +217,24 @@ Runtime Validator
 
 Verification is performed in an isolated execution environment when required.
 
-🔄 End-to-End Workflow
+## End-to-End Workflow
 
-                    ┌───────────────┐
-                    │  Bug Report   │
-                    └───────┬───────┘
-                            │
-                            ▼
-                  ┌───────────────────┐
-                  │ Error + Log       │
-                  │ Diagnosis         │
-                  └─────────┬─────────┘
-                            │
-                            ▼
-                  ┌───────────────────┐
-                  │ Repository + Code │
-                  │ Analysis          │
-                  └─────────┬─────────┘
-                            │
-                            ▼
-                  ┌───────────────────┐
-                  │ Research / RAG    │
-                  │ Context Retrieval │
-                  └─────────┬─────────┘
-                            │
-                            ▼
-                  ┌───────────────────┐
-                  │ Root Cause        │
-                  │ Hypothesis        │
-                  └─────────┬─────────┘
-                            │
-                            ▼
-                  ┌───────────────────┐
-                  │ Patch Generation  │
-                  └─────────┬─────────┘
-                            │
-                            ▼
-                     ┌─────────────┐
-                     │ Patch Review│
-                     └──────┬──────┘
-                            │
-                            ▼
-                  ┌───────────────────┐
-                  │ Docker Sandbox    │
-                  │ Test Execution     │
-                  └─────────┬─────────┘
-                            │
-                     ┌──────┴──────┐
-                     │             │
-                   PASS           FAIL
-                     │             │
-                     ▼             ▼
-              ┌────────────┐  ┌─────────────┐
-              │ Regression │  │ Retry /     │
-              │ + Runtime  │  │ Re-diagnose │
-              └─────┬──────┘  └──────┬──────┘
-                    │                 │
-                    ▼                 │
-             ┌──────────────┐         │
-             │ Verified Fix │◄────────┘
-             └──────────────┘
-
-🧠 Shared State
+```mermaid
+flowchart LR
+    intake([Bug report]) --> diagnosis[Error and log diagnosis]
+    diagnosis --> analysis[Repository and code analysis]
+    analysis --> research[Research and RAG context]
+    research --> hypothesis[Root-cause hypothesis]
+    hypothesis --> generation[Patch generation]
+    generation --> review[Patch review]
+    review --> sandbox[Docker sandbox]
+    sandbox --> decision{Verification result}
+    decision -->|pass| regression[Regression and runtime checks]
+    regression --> verified([Verified Fix])
+    decision -->|fail, retries remain| diagnosis
+    decision -->|fail, retry limit reached| unresolved([Unresolved Failure])
+```
+## Shared State
 
 All workflow stages communicate through a shared BugifyState.
 
@@ -318,88 +271,40 @@ class BugifyState(TypedDict):
 
 The state provides a common contract between agents and allows the orchestrator to preserve information across multiple debugging iterations.
 
-🧪 Verification Loop
+## Verification Loop
 
-A generated patch is not considered a successful fix simply because an LLM produced it.
+A generated patch is not considered a successful fix simply because an LLM produced it. Bugify uses a verification gate before reporting success.
 
-Bugify uses a verification gate:
+```mermaid
+flowchart TD
+    generated[Patch generated] --> reviewed[Patch reviewed]
+    reviewed --> applied[Patch applied]
+    applied --> sandbox[Sandbox execution]
+    sandbox --> focused[Focused tests]
+    focused --> regression[Regression tests]
+    regression --> runtime[Runtime validation]
+    runtime --> result{Verification result}
+    result -->|pass| verified([Verified Fix])
+    result -->|fail, retries remain| retry[Retry diagnosis]
+    result -->|fail, no retries remain| unresolved([Unresolved Failure])
+    retry --> generated
+```
 
-Patch Generated
-      │
-      ▼
-Patch Reviewed
-      │
-      ▼
-Patch Applied
-      │
-      ▼
-Sandbox Execution
-      │
-      ▼
-Focused Tests
-      │
-      ▼
-Regression Tests
-      │
-      ▼
-Runtime Validation
-      │
-   ┌──┴──┐
-   │     │
- PASS   FAIL
-   │     │
-   ▼     ▼
-Verified  Retry
-  Fix     Diagnosis
+This creates a clear distinction between an AI-generated patch and a verified software fix.
 
-This creates a clear distinction between:
-
-AI-generated patch → verified software fix
-
-📚 RAG Pipeline
+## RAG Pipeline
 
 Bugify uses Retrieval-Augmented Generation to provide relevant technical knowledge to the research and fixing stages.
 
- Documentation
-      │
- GitHub Issues
-      │
- Solved Bugs
-      │
- Code Patterns
-      │
-      ▼
-┌───────────────────┐
-│ Knowledge Ingestion│
-└─────────┬─────────┘
-          │
-          ▼
-┌───────────────────┐
-│ Sentence           │
-│ Transformer        │
-│ Embeddings         │
-└─────────┬─────────┘
-          │
-          ▼
-┌───────────────────┐
-│ Qdrant Cloud       │
-│ Vector Database    │
-└─────────┬─────────┘
-          │
-          │ Retrieval
-          ▼
-┌───────────────────┐
-│ Relevant Context   │
-└─────────┬─────────┘
-          │
-          ▼
-┌───────────────────┐
-│ Research Agent     │
-└─────────┬─────────┘
-          │
-          ▼
-     Fix Agent
-
+```mermaid
+flowchart LR
+    sources[Documentation<br/>GitHub Issues<br/>Solved Bugs<br/>Code Patterns] --> ingestion[Knowledge ingestion]
+    ingestion --> embeddings[Sentence Transformer embeddings]
+    embeddings --> qdrant[(Qdrant Vector Database)]
+    qdrant --> context[Relevant context]
+    context --> research[Research Agent]
+    research --> fix[Fix Agent]
+```
 🛠️ Technology Stack
 
 Layer
@@ -899,3 +804,6 @@ No license has been selected for this project yet.
 
 Autonomous Multi-Agent AI Debugging System
 Python · LangGraph · LangChain · Groq · Qdrant · Docker · FastAPI · Pytest · LangSmith
+
+
+
