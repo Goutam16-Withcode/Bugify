@@ -87,7 +87,7 @@ flowchart TB
 ```mermaid
 flowchart LR
     subgraph BUGIFY[Bugify Runtime]
-        api[FastAPI] --> graph[LangGraph] --> agents[Agent modules] --> tools[File, Git, shell, and test tools]
+        api[FastAPI] --> workflow[LangGraph] --> agents[Agent modules] --> tools[File, Git, shell, and test tools]
     end
 
     llm[Groq, OpenAI, or Anthropic] --> agents
@@ -99,7 +99,7 @@ flowchart LR
     docker[Docker] --> sandbox[Sandbox Executor]
     sandbox --> tools
     pytest[Pytest] --> sandbox
-    langsmith[LangSmith] -. tracing .-> graph
+    langsmith[LangSmith] -. tracing .-> workflow
 ```
 ### Workflow Outcomes
 
@@ -803,6 +803,7 @@ No license has been selected for this project yet.
 
 Autonomous Multi-Agent AI Debugging System
 Python · LangGraph · LangChain · Groq · Qdrant · Docker · FastAPI · Pytest · LangSmith
+
 
 
 
