@@ -1,295 +1,547 @@
 /* ═══════════════════════════════════════════════════════════
-   DEBUG CONSOLE MODULE CSS
+   DEBUG CONSOLE MODULE CSS — v2.0
 ═══════════════════════════════════════════════════════════ */
 
 .container {
   padding-top: 84px;
-  padding-bottom: 80px;
+  padding-bottom: 100px;
   min-height: 100vh;
+  position: relative;
 }
 
+/* ── Header ──────────────────────────────────────────── */
 .header {
   margin-bottom: 32px;
+  animation: fadeUp 0.6s ease forwards;
 }
 
 .title {
-  font-size: 2.4rem;
-  font-weight: 800;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 900;
   color: #fff;
-  letter-spacing: -0.025em;
-  margin-top: 12px;
-  margin-bottom: 8px;
+  letter-spacing: -0.03em;
+  margin: 12px 0 8px;
 }
 
 .subtitle {
-  font-size: 1rem;
-  color: #a3a3a3;
+  font-size: 0.97rem;
+  color: #9a9a9a;
   max-width: 680px;
+  line-height: 1.65;
 }
 
-/* Sample Quick Presets */
+/* ── Demo badge ──────────────────────────────────────── */
+.demoBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #737373;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 100px;
+}
+
+/* ── Preset bar ──────────────────────────────────────── */
 .presetBar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   margin-top: 18px;
   flex-wrap: wrap;
 }
 
 .presetLabel {
-  font-size: 0.8rem;
-  color: #737373;
+  font-size: 0.76rem;
+  color: #525252;
   text-transform: uppercase;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
 }
 
 .presetBtn {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #fbbf24;
-  font-size: 0.78rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #737373;
+  font-size: 0.76rem;
   font-weight: 600;
-  padding: 5px 12px;
-  border-radius: 6px;
-  transition: all 150ms ease;
+  padding: 5px 14px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
 }
-
 .presetBtn:hover {
-  background: rgba(245, 158, 11, 0.12);
-  border-color: rgba(245, 158, 11, 0.3);
+  background: rgba(245,158,11,0.08);
+  border-color: rgba(245,158,11,0.25);
+  color: #fbbf24;
   transform: translateY(-1px);
 }
-
-/* Two-column layout */
-.layout {
-  display: grid;
-  grid-template-columns: 1fr 1.15fr;
-  gap: 28px;
-  align-items: start;
+.presetBtnActive {
+  background: rgba(245,158,11,0.12) !important;
+  border-color: rgba(245,158,11,0.4) !important;
+  color: #fbbf24 !important;
 }
 
-/* Form Card */
+/* ── Two-column layout ───────────────────────────────── */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 24px;
+  align-items: start;
+  animation: fadeUp 0.6s 0.1s ease both;
+}
+
+/* ── Form card (left) ────────────────────────────────── */
 .formCard {
-  background: #111114;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: #0f0f12;
+  border: 1px solid rgba(255,255,255,0.07);
   border-radius: 20px;
-  padding: 30px;
+  padding: 28px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  gap: 18px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  position: sticky;
+  top: 84px;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
 }
 
 .formLabel {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #d4d4d4;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 .formSub {
-  font-size: 0.72rem;
-  color: #737373;
+  font-size: 0.7rem;
+  color: #525252;
   font-weight: 400;
 }
 
-.select {
-  width: 100%;
-  background: #09090b;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+/* ── Running log indicator ───────────────────────────── */
+.runningLog {
+  background: rgba(245,158,11,0.06);
+  border: 1px solid rgba(245,158,11,0.2);
   border-radius: 10px;
-  color: #f5f5f5;
-  padding: 10px 14px;
-  font-size: 0.88rem;
-  outline: none;
-}
-
-.select:focus {
-  border-color: #f59e0b;
-}
-
-/* Timeline & Results Card */
-.resultCard {
-  background: #111114;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 20px;
-  padding: 30px;
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-  min-height: 580px;
+  gap: 4px;
+  animation: fadeIn 0.3s ease;
+}
+.runningSpinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(245,158,11,0.2);
+  border-top-color: #f59e0b;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+  display: inline-block;
+}
+.runningStage {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fbbf24;
+  font-family: 'JetBrains Mono', monospace;
+}
+.runningDesc {
+  font-size: 0.74rem;
+  color: #737373;
+  padding-left: 20px;
 }
 
-/* Stepper Timeline */
+/* ── Submit button ───────────────────────────────────── */
+.submitBtn {
+  width: 100%;
+  justify-content: center;
+  padding: 14px !important;
+  font-size: 0.9rem !important;
+  position: relative;
+}
+.btnSpinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(0,0,0,0.2);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+}
+
+/* ── Result card (right) ─────────────────────────────── */
+.resultCard {
+  background: #0f0f12;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 20px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  min-height: 600px;
+}
+
+/* ── Stage Timeline ──────────────────────────────────── */
 .timeline {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: relative;
-  padding: 12px 6px;
-  background: #09090b;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 14px 10px;
+  background: #07070a;
+  border: 1px solid rgba(255,255,255,0.05);
   border-radius: 14px;
+  position: relative;
+}
+
+/* Connecting line between steps */
+.timeline::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+  transform: translateY(-50%);
+  z-index: 0;
 }
 
 .stepItem {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   position: relative;
-  z-index: 2;
+  z-index: 1;
   flex: 1;
 }
 
 .stepCircle {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background: #1a1a1f;
-  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  background: #111116;
+  border: 1.5px solid rgba(255,255,255,0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.8rem;
-  color: #737373;
+  font-size: 0.72rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: #525252;
   font-weight: 700;
-  transition: all 250ms ease;
+  transition: all 0.3s ease;
 }
 
 .stepActive {
-  background: rgba(245, 158, 11, 0.2);
+  background: rgba(245,158,11,0.18);
   border-color: #f59e0b;
   color: #fbbf24;
-  box-shadow: 0 0 14px rgba(245, 158, 11, 0.4);
-  animation: pulseStep 1.5s infinite alternate;
+  box-shadow: 0 0 18px rgba(245,158,11,0.4);
+  animation: pulseStep 1.2s ease-in-out infinite;
 }
 
 @keyframes pulseStep {
-  from { transform: scale(1); }
-  to { transform: scale(1.1); }
+  0%,100% { transform: scale(1); box-shadow: 0 0 18px rgba(245,158,11,0.4); }
+  50% { transform: scale(1.08); box-shadow: 0 0 28px rgba(245,158,11,0.7); }
 }
 
 .stepComplete {
-  background: rgba(34, 197, 94, 0.2);
+  background: rgba(34,197,94,0.15);
   border-color: #22c55e;
   color: #4ade80;
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+  box-shadow: 0 0 12px rgba(34,197,94,0.3);
 }
 
 .stepLabel {
-  font-size: 0.7rem;
-  color: #737373;
+  font-size: 0.66rem;
+  color: #525252;
   font-weight: 600;
   text-align: center;
+  white-space: nowrap;
+}
+.stepLabelActive { color: #fbbf24; }
+.stepLabelComplete { color: #4ade80; }
+
+/* ── Result content ──────────────────────────────────── */
+.resultContent {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+  animation: fadeIn 0.4s ease;
 }
 
-.stepLabelActive {
-  color: #fbbf24;
+/* ── Success banner ──────────────────────────────────── */
+.successBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(34,197,94,0.05);
+  border: 1px solid rgba(34,197,94,0.15);
+  border-radius: 10px;
+}
+.successBannerLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-.stepLabelComplete {
-  color: #4ade80;
-}
-
-/* Tabs */
+/* ── Tabs ────────────────────────────────────────────── */
 .tabRow {
   display: flex;
-  gap: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  padding-bottom: 12px;
+  gap: 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding-bottom: 10px;
 }
 
 .tabBtn {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: #737373;
+  color: #525252;
   padding: 6px 14px;
   border-radius: 8px;
-  transition: all 150ms ease;
+  transition: all 0.15s ease;
+  cursor: pointer;
 }
-
 .tabBtn:hover {
   color: #d4d4d4;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255,255,255,0.04);
 }
-
 .tabActive {
-  color: #fbbf24;
-  background: rgba(245, 158, 11, 0.12);
-  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: #fbbf24 !important;
+  background: rgba(245,158,11,0.1) !important;
+  border: 1px solid rgba(245,158,11,0.25) !important;
 }
 
-/* Diff Viewer */
-.diffViewer {
-  background: #09090b;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  padding: 18px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.82rem;
-  line-height: 1.65;
-  overflow-x: auto;
-  max-height: 380px;
+.tabContent {
+  animation: fadeUp 0.3s ease forwards;
 }
 
-.diffLineAdd {
-  color: #4ade80;
-  background: rgba(34, 197, 94, 0.08);
-  padding: 1px 4px;
-  display: block;
-  border-left: 2px solid #22c55e;
+/* ── Diff viewer ─────────────────────────────────────── */
+.diffHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
 }
 
-.diffLineDel {
-  color: #f87171;
-  background: rgba(239, 68, 68, 0.08);
-  padding: 1px 4px;
-  display: block;
-  border-left: 2px solid #ef4444;
-}
-
-.diffLineCtx {
+.copyBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  font-weight: 600;
   color: #737373;
-  padding: 1px 4px;
-  display: block;
+  padding: 4px 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.copyBtn:hover {
+  color: #fbbf24;
+  border-color: rgba(245,158,11,0.3);
+  background: rgba(245,158,11,0.06);
 }
 
-/* Empty placeholder */
+.diffViewer {
+  background: #07070a;
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.79rem;
+  line-height: 1.7;
+  overflow-x: auto;
+  max-height: 320px;
+}
+.diffViewer::before {
+  content: '';
+  display: block;
+  height: 2px;
+  margin: -16px -16px 12px;
+  background: linear-gradient(90deg, #ef4444, #22c55e);
+  border-radius: 10px 10px 0 0;
+}
+
+.diffLineAdd  { color: #4ade80; background: rgba(34,197,94,0.07); padding: 1px 4px; display: block; border-left: 2px solid #22c55e; margin: 0 -4px; }
+.diffLineDel  { color: #f87171; background: rgba(239,68,68,0.07); padding: 1px 4px; display: block; border-left: 2px solid #ef4444; margin: 0 -4px; }
+.diffLineHunk { color: #60a5fa; padding: 1px 4px; display: block; }
+.diffLineCtx  { color: #525252; padding: 1px 4px; display: block; }
+
+/* ── Diagnosis tab ───────────────────────────────────── */
+.diagGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.diagCard {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 14px 16px;
+  transition: border-color 0.2s ease;
+}
+.diagCard:hover { border-color: rgba(255,255,255,0.12); }
+.diagCardLabel {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #525252;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.diagCardValue {
+  font-size: 1.05rem;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.diagBlock {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+.diagBlockLabel {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #525252;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+/* ── Verification tab ────────────────────────────────── */
+.verifyStrip {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 18px;
+  background: rgba(34,197,94,0.05);
+  border: 1px solid rgba(34,197,94,0.12);
+  border-radius: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.verifyStatBig {
+  font-size: 1.8rem;
+  font-weight: 900;
+  font-family: 'JetBrains Mono', monospace;
+  color: #d4d4d4;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  white-space: nowrap;
+}
+.verifyTags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.testOutput {
+  background: #07070a;
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.77rem;
+  line-height: 1.7;
+  color: #4ade80;
+  overflow-x: auto;
+  max-height: 260px;
+}
+
+/* ── Empty state ─────────────────────────────────────── */
 .emptyState {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 60px 20px;
-  color: #525252;
-  gap: 12px;
+  padding: 40px 20px;
+  gap: 14px;
+  flex: 1;
 }
-
-.emptyIcon {
-  width: 56px;
-  height: 56px;
-  background: rgba(245,158,11,0.08);
-  border: 1px solid rgba(245,158,11,0.15);
-  border-radius: 16px;
+.emptyIconWrap {
+  width: 72px;
+  height: 72px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.7;
+  animation: floatY 6s ease-in-out infinite;
+}
+.emptyTitle {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+}
+.emptyDesc {
+  font-size: 0.85rem;
+  color: #525252;
+  max-width: 320px;
+  line-height: 1.6;
+  margin: 0;
 }
 
+.emptyHints {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 8px;
+}
+.emptyHintItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 8px;
+}
+.emptyHintNum {
+  font-size: 0.68rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  color: #f59e0b;
+}
+.emptyHintLabel {
+  font-size: 0.74rem;
+  color: #525252;
+}
+
+/* ── Responsive ──────────────────────────────────────── */
 @media (max-width: 960px) {
   .layout {
     grid-template-columns: 1fr;
+  }
+  .formCard {
+    position: relative;
+    top: 0;
   }
 }
