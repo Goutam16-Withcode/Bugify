@@ -133,3 +133,21 @@ generated_patches/
 # Local Configuration
 # ================================
 config.local.*
+
+# ================================
+# Next.js / Node.js (ui/)
+# ================================
+ui/node_modules/
+ui/.next/
+ui/out/
+ui/.env.local
+ui/.env.*.local
+ui/npm-debug.log*
+ui/yarn-debug.log*
+ui/yarn-error.log*
+
+# ================================
+# Sentence Transformers Cache
+# ================================
+.cache/huggingface/
+sentence_transformers_cache/
