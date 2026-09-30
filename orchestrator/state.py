@@ -1,32 +1,68 @@
-from typing import TypedDict, List, Optional
+from typing import TypedDict, List, Optional, Dict, Any
 
 
 class BugifyState(TypedDict):
-    # User input
+    # -------------------------------------------------------
+    # User Input
+    # -------------------------------------------------------
     problem: str
     traceback: str
+    logs: str
     repository_path: str
 
-    # Diagnosis
+    # -------------------------------------------------------
+    # Diagnosis Stage
+    # -------------------------------------------------------
     bug_type: Optional[str]
+    bug_category: Optional[str]
+    severity: Optional[str]
+    confidence: float
+    error_type: Optional[str]
+    error_message: Optional[str]
+    error_file: Optional[str]
+    error_line: Optional[int]
     relevant_files: List[str]
 
-    # Root-cause analysis
+    # -------------------------------------------------------
+    # Code Analysis Stage
+    # -------------------------------------------------------
+    repository_info: Dict[str, Any]
+    ast_analysis: Dict[str, Any]
+    dependency_info: Dict[str, Any]
+
+    # -------------------------------------------------------
+    # Research / RAG Stage
+    # -------------------------------------------------------
     hypotheses: List[str]
+    retrieved_context: List[str]
     root_cause: Optional[str]
 
-    # RAG
-    retrieved_context: List[str]
-
-    # Fix generation
+    # -------------------------------------------------------
+    # Fix Stage
+    # -------------------------------------------------------
     proposed_patches: List[str]
+    patch_summary: Optional[str]
+    patch_review: Dict[str, Any]
 
-    # Verification
+    # -------------------------------------------------------
+    # Verification Stage
+    # -------------------------------------------------------
     test_output: Optional[str]
     tests_passed: bool
+    regression_detected: bool
+    syntax_error: Optional[str]
 
-    # Control flow
+    # -------------------------------------------------------
+    # Control Flow
+    # -------------------------------------------------------
     iteration: int
+    max_iterations: int
+    current_stage: Optional[str]
+    stage_errors: List[str]
 
-    # Final response
+    # -------------------------------------------------------
+    # Final Response
+    # -------------------------------------------------------
     final_answer: Optional[str]
+    verified_patch: Optional[str]
+    success: bool
