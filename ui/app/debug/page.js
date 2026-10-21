@@ -623,7 +623,7 @@ export default function DebugPage() {
   const [elapsedTime, setElapsedTime] = useState(0);
   const timerRef = useRef(null);
 
-  const API_BASE = (typeof window !== 'undefined' && window.__BUGIFY_API_URL__) || (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/+$/, '');
+  const API_BASE = (typeof window !== 'undefined' && window.__BUGIFY_API_URL__) || (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://bugify-5.onrender.com').replace(/\/+$/, '');
 
   /* Check API status on load */
   useEffect(() => {
