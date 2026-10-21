@@ -9,6 +9,9 @@ from orchestrator.nodes import (
     run_code_analysis,
     run_research,
     run_fix,
+    run_security_audit,
+    run_complexity_profiler,
+    run_test_generator,
     run_verification,
     finalize,
 )
@@ -26,12 +29,15 @@ def build_bugify_graph() -> StateGraph:
     graph = StateGraph(BugifyState)
 
     # -------------------------------------------------------
-    # Register nodes
+    # Register all 8 autonomous agent nodes
     # -------------------------------------------------------
     graph.add_node("diagnosis", run_diagnosis)
     graph.add_node("code_analysis", run_code_analysis)
     graph.add_node("research", run_research)
     graph.add_node("fix", run_fix)
+    graph.add_node("security_audit", run_security_audit)
+    graph.add_node("complexity_profiler", run_complexity_profiler)
+    graph.add_node("test_generator", run_test_generator)
     graph.add_node("verification", run_verification)
     graph.add_node("increment_iteration", increment_iteration)
     graph.add_node("finalize", finalize)
@@ -43,7 +49,10 @@ def build_bugify_graph() -> StateGraph:
     graph.add_edge("diagnosis", "code_analysis")
     graph.add_edge("code_analysis", "research")
     graph.add_edge("research", "fix")
-    graph.add_edge("fix", "verification")
+    graph.add_edge("fix", "security_audit")
+    graph.add_edge("security_audit", "complexity_profiler")
+    graph.add_edge("complexity_profiler", "test_generator")
+    graph.add_edge("test_generator", "verification")
 
     # -------------------------------------------------------
     # Conditional retry loop

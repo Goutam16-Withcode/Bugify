@@ -679,21 +679,21 @@ Return ONLY the JSON review decision.
 
         content = content.strip()
 
-        # Remove optional Markdown JSON fences.
-        if content.startswith("```"):
+        # Remove optional Markdown JSON fences or extract from {...}
+        json_candidate = content
+        if "{" in content and "}" in content:
+            json_candidate = content[content.find("{"):content.rfind("}") + 1]
+        elif content.startswith("```"):
             if content.startswith("```json"):
                 content = content[len("```json"):]
-
             else:
                 content = content[len("```"):]
-
             if content.endswith("```"):
                 content = content[:-3]
-
-            content = content.strip()
+            json_candidate = content.strip()
 
         try:
-            result = json.loads(content)
+            result = json.loads(json_candidate)
 
             decision = result.get("decision")
             confidence = result.get("confidence")

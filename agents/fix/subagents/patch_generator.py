@@ -445,34 +445,38 @@ Generate ONLY the final unified diff or NO_PATCH.
         """
         Extract a unified diff from an LLM response.
         """
-
         if not content:
             return ""
 
-        # Remove Markdown code fences if the model added them.
-        content = re.sub(
-            r"^```(?:diff|patch)?\s*",
-            "",
-            content,
-            flags=re.IGNORECASE,
-        )
-
-        content = re.sub(
-            r"\s*```$",
-            "",
-            content,
-        )
-
         content = content.strip()
-
-        # A valid unified diff should contain file headers.
-        if (
-            "--- " not in content
-            or "+++ " not in content
-        ):
+        if content.upper() == "NO_PATCH":
             return ""
 
-        return content
+        # Check for diff code block ```diff ... ``` or ``` ... ```
+        fence_match = re.search(r"```(?:diff|patch)?\s*\n(---[\s\S]+?)```", content, re.IGNORECASE)
+        if fence_match:
+            diff_candidate = fence_match.group(1).strip()
+            if "--- " in diff_candidate and "+++ " in diff_candidate:
+                return diff_candidate
+
+        # Look for raw unified diff starting with ---
+        start_idx = content.find("--- ")
+        if start_idx != -1:
+            diff_text = content[start_idx:]
+            fence_end = diff_text.find("```")
+            if fence_end != -1:
+                diff_text = diff_text[:fence_end]
+            diff_text = diff_text.strip()
+            if "+++ " in diff_text:
+                return diff_text
+
+        # Fallback to fence stripping
+        clean = re.sub(r"^```(?:diff|patch)?\s*", "", content, flags=re.IGNORECASE)
+        clean = re.sub(r"\s*```$", "", clean).strip()
+        if "--- " in clean and "+++ " in clean:
+            return clean
+
+        return ""
 
     def _create_summary(self, patch: str) -> str:
         """
