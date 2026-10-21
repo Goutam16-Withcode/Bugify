@@ -269,7 +269,7 @@ Executes the patch inside a Docker sandbox (`python:3.11-slim`, network disabled
 | Sandbox | Docker `python:3.11-slim` with subprocess fallback |
 | Schema | Pydantic v2 TypedDict — strict state validation |
 | Frontend | Next.js 14 — dark amber dashboard |
-| Testing | pytest — 22/22 unit tests passing |
+| Testing | pytest — 26/26 unit tests passing |
 
 ---
 
@@ -277,7 +277,7 @@ Executes the patch inside a Docker sandbox (`python:3.11-slim`, network disabled
 
 **v1.0 — Production Ready**
 
-- ✅ All 22 unit tests passing
+- ✅ All 26 unit tests passing across all agent modules
 - ✅ LangGraph workflow fully wired
 - ✅ Qdrant integration with in-memory fallback
 - ✅ Docker sandbox with subprocess fallback
