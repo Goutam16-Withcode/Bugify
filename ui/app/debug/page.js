@@ -507,6 +507,103 @@ def test_correlate_performance():
       },
     },
   },
+
+  zero_division: {
+    label: 'ZeroDivisionError — Safe Denominator',
+    badge: 'Runtime',
+    description: "ZeroDivisionError: division by zero when user passes 0 as denominator to divide().",
+    traceback: `Traceback (most recent call last):
+  File "app/utils/math_utils.py", line 3, in divide
+    return a / b
+ZeroDivisionError: division by zero`,
+    repo_path: '.',
+    result: {
+      patch: `--- a/app/utils/math_utils.py
++++ b/app/utils/math_utils.py
+@@ -1,4 +1,8 @@
++from typing import Optional
++
+ def divide(a: float, b: float) -> float:
+-    return a / b
++    if b == 0:
++        raise ValueError(f"Denominator must be non-zero. Received: a={a}, b={b}")
++    return a / b
++
+-print(divide(10, 0))
++# Usage: divide(10, 2) -> 5.0  (raises ValueError for b=0)`,
+      review_score: 9.9,
+      diagnosis: {
+        error_type: 'ZeroDivisionError',
+        severity: 'HIGH',
+        confidence: 0.98,
+        root_cause: "Function divide() performs a / b without validating that b is non-zero. Passing b=0 triggers a fatal ZeroDivisionError at the arithmetic operation.",
+        offending_file: 'app/utils/math_utils.py',
+        line_number: 3,
+        rag_pattern: 'Denominator zero-guard with explicit ValueError raise pattern (cosine similarity: 0.99)',
+      },
+      security_audit: {
+        passed: true,
+        safety_score: 99,
+        risk_level: 'LOW',
+        vulnerabilities: [],
+        cwe_citations: ['CWE-369: Divide By Zero'],
+        recommendations: [
+          'Explicit ValueError raise is better than silent return of None or 0.',
+          'No code injection risk introduced — pure arithmetic boundary guard.',
+          'Type hints added to enforce float/int contract at call site.',
+        ],
+      },
+      complexity_analysis: {
+        time_complexity_before: 'O(1)',
+        time_complexity_after: 'O(1)',
+        space_complexity: 'O(1)',
+        impact_rating: 'OPTIMAL',
+        bottlenecks: [],
+        latency_overhead_estimated: '< 0.001ms',
+        optimization_hints: ['Single branch comparison before arithmetic. Zero overhead at runtime.'],
+      },
+      regression_test: {
+        test_file_name: 'test_regression_math_utils.py',
+        test_count: 3,
+        assertions_covered: [
+          'Assert divide(10, 2) returns 5.0',
+          'Assert divide(10, 0) raises ValueError with descriptive message',
+          'Assert divide(-4, 2) returns -2.0 correctly',
+        ],
+        test_code: `import pytest
+from app.utils.math_utils import divide
+
+def test_divide_normal():
+    """Standard division returns correct float result."""
+    assert divide(10, 2) == 5.0
+
+def test_divide_by_zero_raises():
+    """Denominator of zero raises ValueError, not ZeroDivisionError."""
+    with pytest.raises(ValueError, match="Denominator must be non-zero"):
+        divide(10, 0)
+
+def test_divide_negative():
+    """Negative denominator still computes correctly."""
+    assert divide(-4, 2) == -2.0`,
+      },
+      verification: {
+        tests_passed: true,
+        total_tests: 26,
+        failed_tests: 0,
+        execution_time_seconds: 0.19,
+        test_output: `============================= test session starts ==============================
+platform linux -- Python 3.11.9, pytest-8.3.3
+collected 26 items
+
+tests/unit/test_math_utils.py::test_divide_normal            PASSED
+tests/unit/test_math_utils.py::test_divide_by_zero_raises   PASSED
+tests/unit/test_math_utils.py::test_divide_negative         PASSED
+... 23 more tests PASSED
+
+======================== 26 passed in 0.19s ================================`,
+      },
+    },
+  },
 };
 
 export default function DebugPage() {
@@ -618,9 +715,47 @@ export default function DebugPage() {
         throw new Error('Fallback to deterministic swarm preset');
       }
     } catch {
-      // Fallback cleanly to high-fidelity preset data
-      const preset = SAMPLE_BUGS[selectedPreset] || SAMPLE_BUGS.attribute_error;
-      setDebugResult(preset.result);
+      // Smart fallback: if a preset is selected and matches input, use it.
+      // Otherwise, build a dynamic result from the user's actual input.
+      const preset = SAMPLE_BUGS[selectedPreset];
+      const isCustomInput = !selectedPreset ||
+        (description !== preset?.description && traceback !== preset?.traceback);
+
+      if (isCustomInput) {
+        // Detect error type from traceback
+        const tbLower = traceback.toLowerCase();
+        const errType = tbLower.includes('zerodivision') ? 'ZeroDivisionError'
+          : tbLower.includes('attributeerror') ? 'AttributeError'
+          : tbLower.includes('keyerror') ? 'KeyError'
+          : tbLower.includes('typeerror') ? 'TypeError'
+          : tbLower.includes('indexerror') ? 'IndexError'
+          : tbLower.includes('valueerror') ? 'ValueError'
+          : tbLower.includes('importerror') ? 'ImportError'
+          : tbLower.includes('recursion') ? 'RecursionError'
+          : 'RuntimeError';
+        const fileMatch = traceback.match(/File ["']([^"']+)["'],? line (\d+)/i);
+        const errFile = fileMatch ? fileMatch[1] : 'app/main.py';
+        const errLine = fileMatch ? parseInt(fileMatch[2]) : 1;
+        setDebugResult({
+          patch: `# Bugify — Demo Mode (Backend Offline)\n# Connect your Render backend to get a real verified patch.\n# Error detected: ${errType} in ${errFile}:${errLine}\n\n# Your traceback:\n${traceback.slice(0, 400)}`,
+          review_score: '—',
+          diagnosis: {
+            error_type: errType,
+            severity: errType === 'ZeroDivisionError' || errType === 'AttributeError' ? 'HIGH' : 'MEDIUM',
+            confidence: 0.90,
+            root_cause: `Auto-detected ${errType} at ${errFile} line ${errLine}. Connect the Render backend for full LangGraph multi-agent analysis.`,
+            offending_file: errFile,
+            line_number: errLine,
+            rag_pattern: 'Backend required for RAG vector retrieval',
+          },
+          security_audit: { passed: true, safety_score: null, risk_level: 'PENDING', vulnerabilities: [], cwe_citations: [], recommendations: ['Backend offline — connect Render API for OWASP audit.'] },
+          complexity_analysis: { time_complexity_before: '—', time_complexity_after: '—', space_complexity: '—', impact_rating: 'PENDING', bottlenecks: [], latency_overhead_estimated: '—', optimization_hints: ['Backend required for Big-O profiling.'] },
+          regression_test: { test_file_name: '—', test_count: 0, assertions_covered: [], test_code: '# Backend required for test generation.' },
+          verification: { tests_passed: false, total_tests: 0, failed_tests: 0, execution_time_seconds: 0, test_output: 'Backend offline. Set BACKEND_API_URL on Vercel and redeploy.' },
+        });
+      } else {
+        setDebugResult(preset.result);
+      }
     } finally {
       clearInterval(timerRef.current);
       setActiveStageIndex(SWARM_AGENTS.length);
