@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-const backendUrl = (process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000').replace(/\/+$/, '');
+const backendUrl = (process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'https://bugify-5.onrender.com').replace(/\/+$/, '');
 
 const nextConfig = {
   async rewrites() {
