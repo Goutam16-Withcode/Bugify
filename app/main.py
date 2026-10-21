@@ -126,6 +126,18 @@ async def add_timing_header(request: Request, call_next):
 # ──────────────────────────────────────────────────────────
 # Routes
 # ──────────────────────────────────────────────────────────
+@app.get("/", tags=["System"])
+async def root():
+    return {
+        "status": "online",
+        "service": settings.app_name,
+        "version": settings.app_version,
+        "docs": "/docs",
+        "health": "/api/v1/health",
+        "agents": "/api/v1/agents",
+    }
+
+
 @app.get("/api/v1/health", tags=["System"])
 async def health():
     return {"status": "ok", "service": settings.app_name}
