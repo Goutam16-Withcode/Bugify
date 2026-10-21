@@ -623,12 +623,14 @@ export default function DebugPage() {
   const [elapsedTime, setElapsedTime] = useState(0);
   const timerRef = useRef(null);
 
+  const API_BASE = (typeof window !== 'undefined' && window.__BUGIFY_API_URL__) || (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/+$/, '');
+
   /* Check API status on load */
   useEffect(() => {
-    fetch('/api/v1/health')
+    fetch(`${API_BASE}/api/v1/health`)
       .then(r => r.ok ? setApiMode('live') : setApiMode('demo'))
       .catch(() => setApiMode('demo'));
-  }, []);
+  }, [API_BASE]);
 
   const loadPreset = (key) => {
     const p = SAMPLE_BUGS[key];
@@ -671,7 +673,7 @@ export default function DebugPage() {
 
     try {
       /* Submit to backend */
-      const apiReq = fetch('/api/v1/debug', {
+      const apiReq = fetch(`${API_BASE}/api/v1/debug`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -870,7 +872,10 @@ export default function DebugPage() {
                 className="input"
                 rows={3}
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => {
+                  setDescription(e.target.value);
+                  setSelectedPreset(null);
+                }}
                 placeholder="Describe what occurred or expected behavior..."
                 required
               />
@@ -886,7 +891,10 @@ export default function DebugPage() {
                 className="input mono"
                 rows={7}
                 value={traceback}
-                onChange={(e) => setTraceback(e.target.value)}
+                onChange={(e) => {
+                  setTraceback(e.target.value);
+                  setSelectedPreset(null);
+                }}
                 placeholder="Traceback (most recent call last):..."
                 style={{ fontSize: '0.78rem' }}
               />
