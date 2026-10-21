@@ -57,7 +57,7 @@ function CodeIntelligenceStudio() {
       {/* Floating Holographic Telemetry Badges */}
       <div className={styles.floatingChipTop}>
         <span className="dot-pulse" style={{ background: '#22c55e' }} />
-        <span>Pytest Sandbox: 22/22 Passed (0.31s)</span>
+        <span>Pytest Sandbox: Isolated & Active</span>
       </div>
 
       <div className={styles.floatingChipBottom}>
@@ -350,10 +350,10 @@ export default function HomePage() {
               </div>
 
               <h4 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#fff', marginBottom: 4 }}>
-                Unit Test Accuracy
+                Automated Verification
               </h4>
               <p style={{ fontSize: '0.8rem', color: '#737373', maxWidth: 220 }}>
-                22/22 unit tests passing deterministically across all agent modules.
+                Deterministic regression prevention and clean isolation across all agent modules.
               </p>
             </div>
 

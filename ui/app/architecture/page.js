@@ -129,12 +129,12 @@ const PIPELINE = [
     id: 'verification',
     name: 'Verification Node',
     role: 'Isolated Pytest Sandbox',
-    desc: 'Executes patch inside Docker container or subprocess sandbox. Runs full test suite with 22/22 coverage.',
+    desc: 'Executes patch inside Docker container or subprocess sandbox. Runs full automated pytest verification in isolation.',
     Icon: IconVerify,
     color: '#22c55e',
     reads: ['patch', 'repo_path'],
     writes: ['verification', 'is_success'],
-    metric: '22/22 tests pass',
+    metric: '100% Isolated',
   },
   {
     step: '06',
@@ -243,7 +243,7 @@ export default function ArchitecturePage() {
                       {isDone ? '✓' : node.step}
                     </div>
                     <div className={styles.flowNodeIcon} style={{ color: node.color }}>
-                      <Icon />
+                      {Icon && <Icon />}
                     </div>
                     <div className={styles.flowNodeName}>{node.name}</div>
                     <div className={styles.flowNodeRole}>{node.role}</div>

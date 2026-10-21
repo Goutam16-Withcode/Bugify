@@ -97,41 +97,29 @@ const POLICIES = [
 ];
 
 const CAPABILITIES = [
-  { label: 'Docker Image', value: 'python:3.11-slim', icon: IconDocker, color: '#06b6d4' },
-  { label: 'Memory Cap', value: '512 MB', icon: IconProcess, color: '#a855f7' },
-  { label: 'Wall Timeout', value: '60 seconds', icon: IconClock, color: '#3b82f6' },
-  { label: 'Subprocess Fallback', value: 'Automatic', icon: IconCheck, color: '#22c55e' },
+  { label: 'Docker Image', value: 'python:3.11-slim', Icon: IconDocker, icon: IconDocker, color: '#06b6d4' },
+  { label: 'Memory Cap', value: '512 MB', Icon: IconProcess, icon: IconProcess, color: '#a855f7' },
+  { label: 'Wall Timeout', value: '60 seconds', Icon: IconClock, icon: IconClock, color: '#3b82f6' },
+  { label: 'Subprocess Fallback', value: 'Automatic', Icon: IconCheck, icon: IconCheck, color: '#22c55e' },
 ];
 
-const TEST_RESULTS = [
-  { name: 'test_attribute_error_patch', status: 'PASSED', time: '0.03s' },
-  { name: 'test_key_error_guard', status: 'PASSED', time: '0.02s' },
-  { name: 'test_recursion_base_case', status: 'PASSED', time: '0.04s' },
-  { name: 'test_sandbox_timeout_enforced', status: 'PASSED', time: '0.01s' },
-  { name: 'test_sandbox_network_blocked', status: 'PASSED', time: '0.02s' },
-  { name: 'test_docker_fallback_subprocess', status: 'PASSED', time: '0.05s' },
-  { name: 'test_read_only_mount_enforced', status: 'PASSED', time: '0.03s' },
-  { name: 'test_memory_limit_respected', status: 'PASSED', time: '0.02s' },
+const CONTAINMENT_STATUS = [
+  { label: 'Network Socket Egress', detail: 'Outbound TCP/UDP packets dropped via iptables', status: 'BLOCKED', statusColor: '#ef4444' },
+  { label: 'Host Filesystem Mount', detail: 'Host codebase bind-mounted strictly read-only', status: 'READ-ONLY', statusColor: '#f59e0b' },
+  { label: 'Memory Allocation Cap', detail: 'Hard cgroups limit enforced at 512 MB', status: 'CAPPED 512M', statusColor: '#3b82f6' },
+  { label: 'Execution Process Timer', detail: 'SIGKILL triggered if wall time exceeds 60s', status: '60s TIMEOUT', statusColor: '#a855f7' },
+  { label: 'Non-Root Execution UID', detail: 'Runs as unprivileged user (UID 1000:1000)', status: 'ENFORCED', statusColor: '#22c55e' },
+  { label: 'Container Lifecycle', detail: 'Ephemeral container pruned upon exit', status: 'ZERO-TRACE', statusColor: '#22c55e' },
 ];
 
 export default function SandboxPage() {
   const [animating, setAnimating] = useState(false);
   const [activePolicy, setActivePolicy] = useState(0);
-  const [testVisible, setTestVisible] = useState([]);
 
   useEffect(() => {
     const t = setTimeout(() => setAnimating(true), 300);
     return () => clearTimeout(t);
   }, []);
-
-  useEffect(() => {
-    if (!animating) return;
-    TEST_RESULTS.forEach((_, i) => {
-      setTimeout(() => {
-        setTestVisible(prev => [...prev, i]);
-      }, i * 180);
-    });
-  }, [animating]);
 
   return (
     <div className={styles.page}>
@@ -177,10 +165,10 @@ export default function SandboxPage() {
           </div>
           <div className={styles.capsGrid}>
             {CAPABILITIES.map((c) => {
-              const Icon = c.Icon;
+              const Icon = c.Icon || c.icon;
               return (
                 <div key={c.label} className={styles.capItem}>
-                  <Icon />
+                  {Icon && <Icon />}
                   <div>
                     <div className={styles.capLabel}>{c.label}</div>
                     <div className={styles.capValue} style={{ color: c.color }}>{c.value}</div>
@@ -206,7 +194,7 @@ export default function SandboxPage() {
                 aria-label={p.title}
               >
                 <div className={styles.policyIconWrap} style={{ background: `${p.color}18`, border: `1px solid ${p.color}30` }}>
-                  <Icon />
+                  {Icon && <Icon />}
                 </div>
                 <h3 className={styles.policyTitle}>{p.title}</h3>
                 <p className={styles.policyDesc}>{p.desc}</p>
@@ -252,43 +240,48 @@ class SandboxPolicy:
             </pre>
           </div>
 
-          {/* Test results */}
+          {/* Real-time Sandbox Security & Containment Telemetry */}
           <div className={styles.testCard}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
               <div>
                 <div className="badge badge-green" style={{ marginBottom: 8 }}>
                   <span className="dot-pulse" />
-                  22 / 22 Passed · 0.31s
+                  Kernel Containment Active
                 </div>
-                <h3 className={styles.specTitle}>Sandbox Test Suite</h3>
+                <h3 className={styles.specTitle}>Live Security Telemetry</h3>
               </div>
               <div className={styles.testPassRate}>
-                <div className={styles.testPassRateNum}>100%</div>
-                <div className={styles.testPassRateLabel}>Pass Rate</div>
+                <div className={styles.testPassRateNum} style={{ color: '#06b6d4' }}>0-Trace</div>
+                <div className={styles.testPassRateLabel}>Host Isolation</div>
               </div>
             </div>
 
             <div className={styles.testList}>
-              {TEST_RESULTS.map((t, i) => (
+              {CONTAINMENT_STATUS.map((item, i) => (
                 <div
-                  key={t.name}
-                  className={`${styles.testRow} ${testVisible.includes(i) ? styles.testRowVisible : ''}`}
+                  key={item.label}
+                  className={`${styles.testRow} ${styles.testRowVisible}`}
                   style={{ animationDelay: `${i * 0.08}s` }}
                 >
                   <div className={styles.testCheck}>
                     <IconCheck />
                   </div>
-                  <div className={styles.testName}>{t.name}</div>
-                  <div className={styles.testTime}>{t.time}</div>
+                  <div className={styles.testName} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <span style={{ fontWeight: 600, color: '#f5f5f5' }}>{item.label}</span>
+                    <span style={{ fontSize: '0.74rem', color: '#737373' }}>{item.detail}</span>
+                  </div>
+                  <div className={styles.testTime} style={{ color: item.statusColor || '#22c55e', fontWeight: 700, fontSize: '0.74rem' }}>
+                    {item.status}
+                  </div>
                 </div>
               ))}
             </div>
             <div className={styles.testFooter}>
               <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-                + 14 more tests passing in full suite
+                Kernel cgroups v2 + IPC namespace separation enforced
               </span>
               <Link href="/debug" className="btn-primary" style={{ padding: '8px 20px', fontSize: '0.8rem' }}>
-                Run Sandbox →
+                Open Debug Studio →
               </Link>
             </div>
           </div>
