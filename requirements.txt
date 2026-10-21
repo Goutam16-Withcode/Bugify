@@ -11,16 +11,6 @@ openai
 anthropic
 groq
 
-sentence-transformers
-
-chromadb
-faiss-cpu
-rank-bm25
-
-transformers
-huggingface-hub
-datasets
-
 tree-sitter
 tree-sitter-python
 astroid
@@ -49,7 +39,3 @@ rich
 tqdm
 
 PyYAML
-
-docker
-
-ipython
