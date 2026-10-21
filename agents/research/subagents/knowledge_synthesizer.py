@@ -38,18 +38,22 @@ class KnowledgeSynthesizer:
 
         if self.llm and HAS_LC and (docs or issues):
             prompt = (
-                f"You are the Research Agent in an autonomous debugging system.\n"
-                f"Problem: {problem}\n"
-                f"Error: {error_message or 'Unknown'}\n\n"
-                f"Retrieved Context:\n{context_str}\n\n"
-                f"Provide:\n"
-                f"1. 2-3 concise root cause hypotheses.\n"
-                f"2. Suggested architectural or code fix strategy.\n"
-                f"Format as clear bullet points."
+                f"You are a Staff Software Engineer conducting an incident Root Cause Analysis (RCA).\n"
+                f"Defect: {problem}\n"
+                f"Exception: {error_message or 'Unknown'}\n\n"
+                f"Context Evidence:\n{context_str}\n\n"
+                f"Format strictly as follows:\n"
+                f"### Root Cause\n"
+                f"Single concise sentence explaining why the failure occurred.\n\n"
+                f"### Primary Failure Mode\n"
+                f"The exact code mechanism triggering the exception.\n\n"
+                f"### Production Mitigation\n"
+                f"Production-grade code fix (clean, idiomatic, defensive).\n"
+                f"NO generic advice, NO filler sentences, NO essays."
             )
             try:
                 response = self.llm.invoke([
-                    SystemMessage(content="You analyze programming bugs and synthesize technical solutions."),
+                    SystemMessage(content="You are an expert systems engineer writing precise technical RCAs. Output only direct technical facts and production code."),
                     HumanMessage(content=prompt),
                 ])
                 summary = response.content if hasattr(response, "content") else str(response)
