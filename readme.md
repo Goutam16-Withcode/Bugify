@@ -35,9 +35,7 @@ Developer → FastAPI → LangGraph Orchestrator
 
 ## Verified Claims
 
-| Claim | Verification |
-|-------|-------------|
-| 22/22 unit tests passing | `pytest tests/unit -v` — confirmed in `.venv` |
+| 26/26 unit tests passing | `pytest tests/unit -v` — confirmed in `.venv` |
 | LangGraph state router wired | `orchestrator/router.py` — conditional edges with 3-retry loop |
 | AST traversal working | `code_analysis/ast_analyzer.py` — Python `ast` module |
 | Qdrant vector store integrated | `rag/vector_store.py` — with in-memory fallback |
