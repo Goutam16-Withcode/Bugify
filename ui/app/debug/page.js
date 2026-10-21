@@ -606,6 +606,61 @@ tests/unit/test_math_utils.py::test_divide_negative         PASSED
   },
 };
 
+function parseRootCause(text) {
+  if (!text) return { rootCause: '', failureMode: '', mitigationCode: '' };
+
+  let rootCause = '';
+  let failureMode = '';
+  let mitigationCode = '';
+
+  const codeMatch = text.match(/```(?:python)?\s*([\s\S]*?)```/i);
+  if (codeMatch) {
+    mitigationCode = codeMatch[1].trim();
+  }
+
+  const textWithoutCode = text.replace(/```(?:python)?[\s\S]*?```/gi, '').trim();
+
+  const rcMatch = textWithoutCode.match(/###\s*Root Cause\s*([\s\S]*?)(?=###|$)/i);
+  if (rcMatch) rootCause = rcMatch[1].trim();
+
+  const fmMatch = textWithoutCode.match(/###\s*Primary Failure Mode\s*([\s\S]*?)(?=###|$)/i);
+  if (fmMatch) failureMode = fmMatch[1].trim();
+
+  if (!rootCause && !failureMode) {
+    rootCause = textWithoutCode;
+  }
+
+  return { rootCause, failureMode, mitigationCode };
+}
+
+function detectErrorType(errType, rootCause, description, traceback) {
+  if (errType && errType !== 'unknown' && errType !== 'DefectDiagnosed') return errType;
+  const combined = `${traceback || ''} ${description || ''} ${rootCause || ''}`.toLowerCase();
+  if (combined.includes('payment') || combined.includes('gateway') || combined.includes('transaction') || combined.includes('divergence')) {
+    return 'PaymentProcessingError';
+  }
+  if (combined.includes('zerodivision') || combined.includes('division by zero')) return 'ZeroDivisionError';
+  if (combined.includes('attributeerror') || combined.includes('nonetype')) return 'AttributeError';
+  if (combined.includes('keyerror')) return 'KeyError';
+  if (combined.includes('runtimeerror')) return 'RuntimeError';
+  if (combined.includes('timeouterror') || combined.includes('timeout')) return 'TimeoutError';
+  if (combined.includes('typeerror')) return 'TypeError';
+  if (combined.includes('valueerror')) return 'ValueError';
+  return errType || 'RuntimeDefect';
+}
+
+function detectSeverity(severity, errorType, rootCause, description) {
+  if (severity && severity !== 'low' && severity !== 'unknown') return severity.toUpperCase();
+  const combined = `${errorType || ''} ${description || ''} ${rootCause || ''}`.toLowerCase();
+  if (combined.includes('payment') || combined.includes('critical') || combined.includes('divergence') || combined.includes('runtimeerror') || combined.includes('security')) {
+    return 'CRITICAL';
+  }
+  if (combined.includes('zerodivision') || combined.includes('attributeerror') || combined.includes('keyerror')) {
+    return 'HIGH';
+  }
+  return 'MEDIUM';
+}
+
 export default function DebugPage() {
   const [selectedPreset, setSelectedPreset] = useState('attribute_error');
   const [description, setDescription] = useState(SAMPLE_BUGS.attribute_error.description);

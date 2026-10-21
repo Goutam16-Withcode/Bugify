@@ -420,15 +420,78 @@
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: 10px;
   padding: 14px 16px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 .diagBlockLabel {
   font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #525252;
+  color: #737373;
   font-weight: 700;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.diagSectionRoot {
+  background: rgba(59, 130, 246, 0.04);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+}
+.diagSectionFailure {
+  background: rgba(245, 158, 11, 0.04);
+  border: 1px solid rgba(245, 158, 11, 0.22);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+}
+.diagSectionTitle {
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.diagSectionText {
+  font-size: 0.88rem;
+  color: #e5e5e5;
+  line-height: 1.65;
+}
+.diagCodeContainer {
+  background: #0d1117;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+.diagCodeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.diagCodeLang {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #a3a3a3;
+  letter-spacing: 0.08em;
+}
+.diagCodePre {
+  margin: 0;
+  padding: 16px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  color: #e6edf3;
+  line-height: 1.55;
 }
 
 /* ── Verification tab ────────────────────────────────── */

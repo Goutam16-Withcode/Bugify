@@ -18,13 +18,24 @@ class DiagnosisAgent:
     ) -> Dict : 
         
         parsed_error = self.error_parser.parse(traceback)
+        if not parsed_error.get("error_type"):
+            inferred = self.error_parser.parse_text(f"{problem} {logs}")
+            if inferred.get("error_type"):
+                parsed_error["error_type"] = inferred["error_type"]
+                if not parsed_error.get("error_message"):
+                    parsed_error["error_message"] = inferred["error_message"]
+
         log_analysis = self.log_analyzer.analyze(logs)
         classification = self.bug_classifier.classify(
             error_type=parsed_error.get("error_type"),
-            error_message=parsed_error.get("error_message"),
+            error_message=parsed_error.get("error_message") or problem[:150],
             logs=log_analysis.get("logs", []),
             patterns=log_analysis.get("patterns", [])
         )
+        # If classification severity defaulted to low for critical/runtime bugs, elevate it
+        severity = classification.get("severity") or "MEDIUM"
+        if parsed_error.get("error_type") in ["PaymentProcessingError", "RuntimeError", "ZeroDivisionError", "SecurityError", "DatabaseError"] or "payment" in problem.lower():
+            severity = "HIGH" if severity.lower() in ["low", "medium", "unknown"] else severity
         
         relevant_files: List[str] = []
 
@@ -35,7 +46,7 @@ class DiagnosisAgent:
             "problem": problem,
             "bug_type": classification.get("bug_type"),
             "category": classification.get("category"),
-            "severity": classification.get("severity"),
+            "severity": severity,
             "confidence": classification.get("confidence"),
 
             "error_type": parsed_error.get("error_type"),
