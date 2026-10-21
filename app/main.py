@@ -54,12 +54,21 @@ def create_app() -> FastAPI:
         redoc_url="/redoc",
     )
 
+    @app.middleware("http")
+    async def add_timing_header(request: Request, call_next):
+        start = time.perf_counter()
+        response = await call_next(request)
+        elapsed = time.perf_counter() - start
+        response.headers["X-Process-Time"] = f"{elapsed:.4f}s"
+        return response
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.cors_origins,
-        allow_credentials=True,
+        allow_origins=["*"],
+        allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],
+        expose_headers=["*"],
     )
 
     return app
@@ -110,17 +119,6 @@ class DebugResponse(BaseModel):
     duration_seconds: float = 0.0
     stage_errors: list[str] = []
 
-
-# ──────────────────────────────────────────────────────────
-# Middleware: Request timing
-# ──────────────────────────────────────────────────────────
-@app.middleware("http")
-async def add_timing_header(request: Request, call_next):
-    start = time.perf_counter()
-    response = await call_next(request)
-    elapsed = time.perf_counter() - start
-    response.headers["X-Process-Time"] = f"{elapsed:.4f}s"
-    return response
 
 
 # ──────────────────────────────────────────────────────────
