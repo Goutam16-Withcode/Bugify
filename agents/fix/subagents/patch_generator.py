@@ -63,24 +63,37 @@ class PatchGenerator:
         }
 
     def _build_prompt(
-    self,
-    problem: str,
-    traceback: str,
-    root_cause: Optional[str],
-    relevant_files: List[str],
-    code_context: Dict,
-    retrieved_context: List[str],
-) -> str:
-     files = "\n".join(
-        f"- {file}"
-        for file in relevant_files
-    )
+        self,
+        problem: str,
+        traceback: str,
+        root_cause: Optional[str],
+        relevant_files: List[str],
+        code_context: Dict,
+        retrieved_context: List[str],
+    ) -> str:
+        files = "\n".join(f"- {file}" for file in relevant_files)
+        
+        # Format code_context concisely to stay strictly within LLM token limits
+        formatted_context_parts = []
+        if isinstance(code_context, dict):
+            for fname, finfo in list(code_context.items())[:3]:
+                if isinstance(finfo, dict):
+                    source = finfo.get("source") or finfo.get("content")
+                    if source:
+                        formatted_context_parts.append(f"File: {fname}\n```python\n{source[:1500]}\n```")
+                    else:
+                        summary_info = {
+                            "functions": [f.get("name") if isinstance(f, dict) else str(f) for f in finfo.get("functions", [])[:5]],
+                            "classes": [c.get("name") if isinstance(c, dict) else str(c) for c in finfo.get("classes", [])[:5]],
+                            "imports": finfo.get("imports", [])[:5],
+                        }
+                        formatted_context_parts.append(f"File: {fname}: {summary_info}")
+                else:
+                    formatted_context_parts.append(f"File: {fname}: {str(finfo)[:500]}")
+        formatted_code_context = "\n\n".join(formatted_context_parts) if formatted_context_parts else "No direct AST context available."
+        formatted_retrieved_context = "\n".join(retrieved_context[:3])[:1500]
 
-     context = "\n".join(
-        retrieved_context
-    )
-
-     return f"""
+        return f"""
 You are the Patch Generation Sub-Agent inside Bugify,
 an autonomous multi-agent software debugging system.
 

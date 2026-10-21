@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Any
 from llm.groq_client import get_llm
 
 class TestGeneratorAgent:
+    __test__ = False
     """
     Self-Healing Test Generator Agent for Bugify.
     

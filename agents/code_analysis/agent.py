@@ -73,19 +73,17 @@ class CodeAnalysisAgent:
             [],
         )
 
+        norm_sources = [s.replace("\\", "/") for s in source_files]
         if relevant_files:
-            files_to_analyze = [
-                file
-                for file in relevant_files
-                if file in source_files
-            ]
-
-            # If diagnosis files don't match the repository
-            # listing, fall back to all source files.
-            if not files_to_analyze:
-                files_to_analyze = source_files
+            matched = []
+            for rf in relevant_files:
+                norm_rf = rf.replace("\\", "/")
+                if norm_rf in norm_sources or rf in source_files:
+                    matched.append(rf)
+            # If not in disk source listing, still analyze the relevant_files directly
+            files_to_analyze = (matched or relevant_files)[:3]
         else:
-            files_to_analyze = source_files
+            files_to_analyze = source_files[:3]
 
         # --------------------------------------------------
         # 4. AST analysis
