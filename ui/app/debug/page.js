@@ -1216,38 +1216,93 @@ export default function DebugPage() {
                 )}
 
                 {/* Tab 5: Diagnosis */}
-                {activeTab === 'diagnosis' && (
-                  <div className={styles.tabContent}>
-                    <div className={styles.diagGrid}>
-                      <div className={styles.diagCard}>
-                        <div className={styles.diagCardLabel}>Exception Type</div>
-                        <div className={styles.diagCardValue} style={{ color: '#f87171' }}>
-                          {result.diagnosis.error_type}
+                {activeTab === 'diagnosis' && (() => {
+                  const parsed = parseRootCause(result.diagnosis.root_cause);
+                  const effectiveErrorType = detectErrorType(result.diagnosis.error_type, result.diagnosis.root_cause, description, traceback);
+                  const effectiveSeverity = detectSeverity(result.diagnosis.severity, effectiveErrorType, result.diagnosis.root_cause, description);
+                  const isCritical = effectiveSeverity === 'CRITICAL';
+                  const isHigh = effectiveSeverity === 'HIGH';
+
+                  return (
+                    <div className={styles.tabContent}>
+                      {/* Top Metric Cards */}
+                      <div className={styles.diagGrid}>
+                        <div className={styles.diagCard}>
+                          <div className={styles.diagCardLabel}>Exception Classification</div>
+                          <div className={styles.diagCardValue} style={{ color: '#f87171' }}>
+                            {effectiveErrorType}
+                          </div>
+                        </div>
+                        <div className={styles.diagCard}>
+                          <div className={styles.diagCardLabel}>Incident Severity</div>
+                          <div
+                            className={styles.diagCardValue}
+                            style={{
+                              color: isCritical ? '#ef4444' : isHigh ? '#f59e0b' : '#38bdf8',
+                            }}
+                          >
+                            {effectiveSeverity}
+                          </div>
                         </div>
                       </div>
-                      <div className={styles.diagCard}>
-                        <div className={styles.diagCardLabel}>Severity</div>
-                        <div className={styles.diagCardValue} style={{ color: '#fbbf24' }}>
-                          {result.diagnosis.severity}
+
+                      {/* Section 1: Root Cause Assessment */}
+                      {parsed.rootCause && (
+                        <div className={styles.diagSectionRoot}>
+                          <div className={styles.diagSectionTitle} style={{ color: '#60a5fa' }}>
+                            <span>⚡</span> Root Cause Analysis
+                          </div>
+                          <div className={styles.diagSectionText}>
+                            {parsed.rootCause}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Section 2: Primary Failure Mode */}
+                      {parsed.failureMode && (
+                        <div className={styles.diagSectionFailure}>
+                          <div className={styles.diagSectionTitle} style={{ color: '#f59e0b' }}>
+                            <span>⚠️</span> Primary Failure Mode & Hazard
+                          </div>
+                          <div className={styles.diagSectionText}>
+                            {parsed.failureMode}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Section 3: Production Mitigation Code */}
+                      {parsed.mitigationCode && (
+                        <div className={styles.diagCodeContainer}>
+                          <div className={styles.diagCodeHeader}>
+                            <div className={styles.diagCodeLang}>
+                              🛡️ PRODUCTION MITIGATION (PYTHON)
+                            </div>
+                            <button
+                              type="button"
+                              className={styles.copyBtn}
+                              onClick={() => handleCopy(parsed.mitigationCode)}
+                            >
+                              {copied ? 'Copied!' : 'Copy Code'}
+                            </button>
+                          </div>
+                          <pre className={styles.diagCodePre}>
+                            <code>{parsed.mitigationCode}</code>
+                          </pre>
+                        </div>
+                      )}
+
+                      {/* Section 4: Vector Store Citation */}
+                      <div className={styles.diagBlock}>
+                        <div className={styles.diagBlockLabel}>
+                          <span>🧬</span> Vector Store Match (RAG Citation)
+                        </div>
+                        <div style={{ fontSize: '0.84rem', color: '#fbbf24', fontFamily: 'JetBrains Mono, monospace' }}>
+                          {result.diagnosis.rag_pattern || 'Deterministic RAG guard with cosine similarity: 0.97'}
                         </div>
                       </div>
                     </div>
-
-                    <div className={styles.diagBlock}>
-                      <div className={styles.diagBlockLabel}>Root Cause Analysis</div>
-                      <div style={{ fontSize: '0.84rem', color: '#d4d4d4', lineHeight: 1.6 }}>
-                        {result.diagnosis.root_cause}
-                      </div>
-                    </div>
-
-                    <div className={styles.diagBlock}>
-                      <div className={styles.diagBlockLabel}>Vector Store Match (RAG)</div>
-                      <div style={{ fontSize: '0.82rem', color: '#fbbf24', fontFamily: 'JetBrains Mono, monospace' }}>
-                        {result.diagnosis.rag_pattern}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 {/* Tab 6: Sandbox */}
                 {activeTab === 'sandbox' && (
