@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     groq_api_key: str = Field(default="", alias="GROQ_API_KEY")
     openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
     anthropic_api_key: str = Field(default="", alias="ANTHROPIC_API_KEY")
-    groq_model: str = "llama-3.3-70b-versatile"
+    groq_model: str = Field(default="openai/gpt-oss-120b", alias="GROQ_MODEL")
     openai_model: str = "gpt-4o"
     llm_temperature: float = 0.0
     llm_max_retries: int = 3

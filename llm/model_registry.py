@@ -52,12 +52,12 @@ def get_model(
     provider = provider.lower().strip()
 
     defaults = {
-        "groq": "llama-3.3-70b-versatile",
+        "groq": "openai/gpt-oss-120b",
         "openai": "gpt-4o",
         "anthropic": "claude-3-5-sonnet-20241022",
     }
 
-    model_name = model or defaults.get(provider, "llama-3.3-70b-versatile")
+    model_name = model or os.getenv("GROQ_MODEL") or defaults.get(provider, "openai/gpt-oss-120b")
 
     if provider == "groq":
         return _get_groq(model_name, temperature)
