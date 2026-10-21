@@ -427,6 +427,16 @@ You can ingest your own company or repository post-mortems and bug fix documenta
 
 ---
 
+## Cloud Deployment (Vercel + Render / Railway)
+
+Bugify is pre-configured for free-tier cloud PaaS deployment:
+- **Frontend Studio:** Deploy to **Vercel** with automatic Next.js App Router optimization.
+- **Backend API:** Deploy to **Render** or **Railway** using the included `render.yaml`, `railway.json`, `Procfile`, or `Dockerfile`.
+
+See the complete step-by-step instructions in [DEPLOYMENT.md](./DEPLOYMENT.md).
+
+---
+
 ## License
 
 This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for details.

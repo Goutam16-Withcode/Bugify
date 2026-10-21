@@ -1,6 +1,9 @@
 langchain
 langchain-core
 langchain-community
+langchain-groq
+langchain-openai
+langchain-anthropic
 langgraph
 langgraph-checkpoint
 
@@ -27,7 +30,9 @@ GitPython
 fastapi
 uvicorn
 pydantic
+pydantic-settings
 python-dotenv
+qdrant-client
 
 requests
 httpx
