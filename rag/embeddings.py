@@ -26,9 +26,12 @@ class EmbeddingService:
     def _get_model(self):
         if self._model is None and HAS_SENTENCE_TRANSFORMERS:
             try:
-                self._model = SentenceTransformer(self.model_name)
+                self._model = SentenceTransformer(self.model_name, local_files_only=True)
             except Exception:
-                self._model = None
+                try:
+                    self._model = SentenceTransformer(self.model_name)
+                except Exception:
+                    self._model = None
         return self._model
 
     def embed_query(self, text: str) -> List[float]:

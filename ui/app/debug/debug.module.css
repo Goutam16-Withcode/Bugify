@@ -535,6 +535,256 @@
   color: #525252;
 }
 
+/* ── Advanced Swarm Pipeline Visualizer ───────────────── */
+.pipelineWrapper {
+  margin-bottom: 24px;
+  background: rgba(15, 15, 18, 0.7);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 16px 20px;
+  backdrop-filter: blur(12px);
+}
+
+.pipelineHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.pipelineTitle {
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #fbbf24;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pipelineGrid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 8px;
+  position: relative;
+}
+
+.pipelineNode {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.pipelineNodeActive {
+  background: rgba(245,158,11,0.12);
+  border-color: rgba(245,158,11,0.5);
+  box-shadow: 0 0 20px rgba(245,158,11,0.2);
+  transform: translateY(-2px);
+}
+
+.pipelineNodeDone {
+  background: rgba(34,197,94,0.06);
+  border-color: rgba(34,197,94,0.3);
+}
+
+.pipelineNodeIndex {
+  font-size: 0.62rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  color: #737373;
+}
+
+.pipelineNodeName {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #d4d4d4;
+  line-height: 1.2;
+}
+
+.pipelineNodeStatus {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #737373;
+}
+
+/* ── Security Audit Tab ──────────────────────────────── */
+.securityHero {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: linear-gradient(135deg, rgba(34,197,94,0.06) 0%, rgba(245,158,11,0.04) 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.scoreCircle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #0f0f13;
+  border: 3px solid #22c55e;
+  box-shadow: 0 0 24px rgba(34,197,94,0.25);
+  flex-shrink: 0;
+}
+
+.scoreNum {
+  font-size: 1.45rem;
+  font-weight: 900;
+  font-family: 'JetBrains Mono', monospace;
+  color: #fff;
+  line-height: 1;
+}
+
+.scoreLabel {
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #737373;
+  letter-spacing: 0.04em;
+}
+
+.securityMeta {
+  flex: 1;
+}
+
+.securityRiskBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.riskLow {
+  background: rgba(34,197,94,0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34,197,94,0.3);
+}
+
+.riskHigh {
+  background: rgba(239,68,68,0.15);
+  color: #f87171;
+  border: 1px solid rgba(239,68,68,0.3);
+}
+
+.vulnList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.vulnCard {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-left: 3px solid #f59e0b;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.78rem;
+  color: #d4d4d4;
+  line-height: 1.5;
+}
+
+/* ── Performance & Complexity Tab ────────────────────── */
+.complexityGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.complexityCard {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+}
+
+.complexityLabel {
+  font-size: 0.68rem;
+  color: #737373;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.complexityVal {
+  font-size: 1.25rem;
+  font-weight: 900;
+  font-family: 'JetBrains Mono', monospace;
+  color: #fbbf24;
+}
+
+.complexityShift {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+/* ── Self-Healing Test Suite Tab ─────────────────────── */
+.testSuiteHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.testCodeBlock {
+  background: #08080c;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  line-height: 1.65;
+  color: #93c5fd;
+  overflow-x: auto;
+  max-height: 320px;
+}
+
+.assertionChip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+  font-size: 0.76rem;
+  color: #a3a3a3;
+  margin-top: 8px;
+}
+
 /* ── Responsive ──────────────────────────────────────── */
 @media (max-width: 960px) {
   .layout {
@@ -544,4 +794,17 @@
     position: relative;
     top: 0;
   }
+  .pipelineGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
+
+@media (max-width: 600px) {
+  .pipelineGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .complexityGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
