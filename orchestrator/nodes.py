@@ -12,6 +12,9 @@ from agents.code_analysis.agent import CodeAnalysisAgent
 from agents.research.agent import ResearchAgent
 from agents.fix.agent import FixAgent
 from agents.verification.agent import VerificationAgent
+from agents.security.agent import SecurityAuditAgent
+from agents.performance.agent import PerformanceProfilerAgent
+from agents.test_generator.agent import TestGeneratorAgent
 
 logger = logging.getLogger(__name__)
 

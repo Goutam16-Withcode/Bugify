@@ -45,6 +45,14 @@ class BugifyState(TypedDict):
     patch_review: Dict[str, Any]
 
     # -------------------------------------------------------
+    # Advanced Multi-Agent Intelligence Stages
+    # -------------------------------------------------------
+    security_audit: Optional[Dict[str, Any]]
+    complexity_analysis: Optional[Dict[str, Any]]
+    regression_test: Optional[Dict[str, Any]]
+    agent_telemetry: Optional[List[Dict[str, Any]]]
+
+    # -------------------------------------------------------
     # Verification Stage
     # -------------------------------------------------------
     test_output: Optional[str]
