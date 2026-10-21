@@ -294,7 +294,7 @@ export default function HomePage() {
                 Visual Agent Pipeline
               </h3>
               <p style={{ color: '#8c8c8c', fontSize: '0.88rem', lineHeight: 1.6, maxWidth: 500 }}>
-                Every bug report traverses an orchestrated pipeline of specialized agents: Diagnosis, Code Analysis, Research, Fix, and Verification.
+                Every bug report traverses an orchestrated pipeline of 8 specialized agents: Diagnosis, Code Analysis, Research RAG, Fix Synthesis, Security Audit, Big-O Profiler, Test Generator, and Sandbox Verification.
               </p>
 
               <div className={styles.nodeGraphMock}>
@@ -303,14 +303,17 @@ export default function HomePage() {
                   { step: '02', label: 'Code Analysis' },
                   { step: '03', label: 'Research' },
                   { step: '04', label: 'Fix Agent' },
-                  { step: '05', label: 'Verification' },
+                  { step: '05', label: 'Security' },
+                  { step: '06', label: 'Profiler' },
+                  { step: '07', label: 'Test Gen' },
+                  { step: '08', label: 'Verify' },
                 ].map((item, idx) => (
                   <div key={item.label} style={{ display: 'contents' }}>
                     <div className={styles.nodeItem}>
                       <div className={styles.nodeCircle}>{item.step}</div>
                       <span className={styles.nodeLabel}>{item.label}</span>
                     </div>
-                    {idx < 4 && <div className={styles.nodeLine} />}
+                    {idx < 7 && <div className={styles.nodeLine} />}
                   </div>
                 ))}
               </div>

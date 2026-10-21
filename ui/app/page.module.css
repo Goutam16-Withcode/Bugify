@@ -701,12 +701,12 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  min-width: 72px;
+  min-width: 58px;
 }
 
 .nodeCircle {
-  width: 44px;
-  height: 34px;
+  width: 38px;
+  height: 30px;
   border-radius: 8px;
   background: rgba(245, 158, 11, 0.1);
   border: 1.5px solid rgba(245, 158, 11, 0.4);
@@ -714,23 +714,24 @@
   align-items: center;
   justify-content: center;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   font-weight: 700;
   color: #fbbf24;
   box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
 }
 
 .nodeLabel {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: #a3a3a3;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .nodeLine {
   flex: 1;
   height: 2px;
   background: linear-gradient(90deg, rgba(245, 158, 11, 0.5), rgba(245, 158, 11, 0.2));
-  min-width: 20px;
+  min-width: 10px;
 }
 
 /* ── Intelligent Agents Flow Visualizer (Section 3) ─────── */
