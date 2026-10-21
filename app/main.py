@@ -72,24 +72,43 @@ app = create_app()
 # Request / Response Models
 # ──────────────────────────────────────────────────────────
 class DebugRequest(BaseModel):
-    problem: str = Field(..., min_length=5, description="Bug description or title")
+    problem: str = Field(default="", description="Bug description or title")
+    problem_description: Optional[str] = Field(default=None, description="Alias for problem")
     traceback: str = Field(default="", description="Stack trace text")
     logs: str = Field(default="", description="Relevant runtime or build logs")
-    repository_path: str = Field(..., description="Absolute or relative path to the target repository")
+    repository_path: str = Field(default=".", description="Absolute or relative path to target repository")
+    repo_path: Optional[str] = Field(default=None, description="Alias for repository_path")
     max_iterations: int = Field(default=3, ge=1, le=5, description="Max fix-verify retry cycles")
+
+    def get_problem(self) -> str:
+        return self.problem or self.problem_description or "Unspecified issue"
+
+    def get_repo_path(self) -> str:
+        return self.repository_path or self.repo_path or "."
 
 
 class DebugResponse(BaseModel):
     success: bool
     final_answer: str
-    bug_type: Optional[str]
-    severity: Optional[str]
-    root_cause: Optional[str]
-    patch_summary: Optional[str]
-    verified_patch: Optional[str]
-    iterations: int
-    duration_seconds: float
-    stage_errors: list[str]
+    bug_type: Optional[str] = None
+    severity: Optional[str] = None
+    confidence: float = 0.0
+    error_type: Optional[str] = None
+    error_file: Optional[str] = None
+    error_line: Optional[int] = None
+    relevant_files: list[str] = []
+    root_cause: Optional[str] = None
+    patch_summary: Optional[str] = None
+    verified_patch: Optional[str] = None
+    proposed_patches: list[str] = []
+    security_audit: Optional[Dict[str, Any]] = None
+    complexity_analysis: Optional[Dict[str, Any]] = None
+    regression_test: Optional[Dict[str, Any]] = None
+    hypotheses: list[str] = []
+    tests_passed: bool = False
+    iterations: int = 1
+    duration_seconds: float = 0.0
+    stage_errors: list[str] = []
 
 
 # ──────────────────────────────────────────────────────────
@@ -125,21 +144,107 @@ async def api_status():
     }
 
 
+@app.get("/api/v1/agents", tags=["System"])
+async def list_agents():
+    """Return the registry of all 8 specialized agents in the Bugify Swarm."""
+    return {
+        "count": 8,
+        "swarm_status": "ONLINE",
+        "agents": [
+            {
+                "id": "diagnosis",
+                "name": "Diagnosis Agent",
+                "stage": "STAGE 1 / ROOT CAUSE",
+                "role": "Traceback Parsing & Fault Isolation",
+                "model": settings.groq_model,
+                "status": "ACTIVE",
+                "capabilities": ["Multi-frame stack trace extraction", "Deterministic bug typing", "Regex AST line pointer"],
+            },
+            {
+                "id": "code_analysis",
+                "name": "Code Analysis Agent",
+                "stage": "STAGE 2 / REPO EXPLORATION",
+                "role": "AST Syntax Traversal & Dependency Graphing",
+                "model": "Python AST Engine",
+                "status": "ACTIVE",
+                "capabilities": ["Abstract syntax tree walking", "Import dependency resolution", "Cyclic dependency guard"],
+            },
+            {
+                "id": "research",
+                "name": "Research Agent",
+                "stage": "STAGE 3 / KNOWLEDGE RETRIEVAL",
+                "role": "Dense Vector Search & Hypothesis Formulation",
+                "model": "Qdrant + Tavily",
+                "status": "ACTIVE",
+                "capabilities": ["Semantic cosine similarity search", "Official documentation retrieval", "Hypothesis synthesis"],
+            },
+            {
+                "id": "fix",
+                "name": "Fix Synthesis Agent",
+                "stage": "STAGE 4 / PATCH GENERATION",
+                "role": "Adversarial Patch Synthesis & Refactoring",
+                "model": settings.groq_model,
+                "status": "ACTIVE",
+                "capabilities": ["Minimal unified diff generation", "Adversarial patch reviewer", "Localized AST refactorer"],
+            },
+            {
+                "id": "security_audit",
+                "name": "Security Audit Agent",
+                "stage": "STAGE 5 / SECURITY & VULNERABILITY",
+                "role": "OWASP Top 10 & CWE Exploit Scanning",
+                "model": f"{settings.groq_model} + Static CWE Engine",
+                "status": "ACTIVE",
+                "capabilities": ["SQLi & Command injection detection", "Path traversal audit", "Insecure deserialization guard"],
+            },
+            {
+                "id": "complexity_profiler",
+                "name": "Performance Profiler Agent",
+                "stage": "STAGE 6 / PERFORMANCE & BIG-O",
+                "role": "Asymptotic Complexity & Hotspot Analysis",
+                "model": "Asymptotic AST Profiler",
+                "status": "ACTIVE",
+                "capabilities": ["Big-O time complexity (Before vs After)", "Space footprint estimation", "Loop nesting hazard detection"],
+            },
+            {
+                "id": "test_generator",
+                "name": "Test Generator Agent",
+                "stage": "STAGE 7 / SELF-HEALING REGRESSION",
+                "role": "Automated Pytest Suite Synthesis",
+                "model": settings.groq_model,
+                "status": "ACTIVE",
+                "capabilities": ["Regression test synthesis", "Boundary edge-case generation", "Pytest fixture mocking"],
+            },
+            {
+                "id": "verification",
+                "name": "Verification Agent",
+                "stage": "STAGE 8 / ISOLATED SANDBOX",
+                "role": "Sandbox Execution & Regression Testing",
+                "model": "Docker / Subprocess Isolation",
+                "status": "ACTIVE",
+                "capabilities": ["In-memory compilation test", "Docker container sandboxing", "Pytest runner with baseline comparison"],
+            },
+        ],
+    }
+
+
 @app.post("/api/v1/debug", response_model=DebugResponse, tags=["Debugging"])
 async def debug_bug(request: DebugRequest):
     """
     Submit a bug report and receive an autonomous diagnosis and patch.
 
-    The workflow runs: Diagnosis → Code Analysis → Research (RAG) → Fix → Verification
+    The workflow runs: Diagnosis → Code Analysis → Research → Fix → Security Audit →
+    Complexity Profiler → Test Generator → Verification
     """
-    logger.info(f"Received debug request: {request.problem[:80]!r}")
+    problem = request.get_problem()
+    repo_path = request.get_repo_path()
+    logger.info(f"Received debug request: {problem[:80]!r} (repo: {repo_path})")
     start_time = time.perf_counter()
 
     initial_state = {
-        "problem": request.problem,
+        "problem": problem,
         "traceback": request.traceback,
         "logs": request.logs,
-        "repository_path": request.repository_path,
+        "repository_path": repo_path,
         "bug_type": None,
         "bug_category": None,
         "severity": None,
@@ -158,6 +263,10 @@ async def debug_bug(request: DebugRequest):
         "proposed_patches": [],
         "patch_summary": None,
         "patch_review": {},
+        "security_audit": None,
+        "complexity_analysis": None,
+        "regression_test": None,
+        "agent_telemetry": [],
         "test_output": None,
         "tests_passed": False,
         "regression_detected": False,
@@ -188,9 +297,20 @@ async def debug_bug(request: DebugRequest):
         final_answer=final_state.get("final_answer", "No answer generated."),
         bug_type=final_state.get("bug_type"),
         severity=final_state.get("severity"),
+        confidence=final_state.get("confidence", 0.0),
+        error_type=final_state.get("error_type"),
+        error_file=final_state.get("error_file"),
+        error_line=final_state.get("error_line"),
+        relevant_files=final_state.get("relevant_files", []),
         root_cause=final_state.get("root_cause"),
         patch_summary=final_state.get("patch_summary"),
         verified_patch=final_state.get("verified_patch"),
+        proposed_patches=final_state.get("proposed_patches", []),
+        security_audit=final_state.get("security_audit"),
+        complexity_analysis=final_state.get("complexity_analysis"),
+        regression_test=final_state.get("regression_test"),
+        hypotheses=final_state.get("hypotheses", []),
+        tests_passed=final_state.get("tests_passed", False),
         iterations=final_state.get("iteration", 1),
         duration_seconds=round(duration, 3),
         stage_errors=final_state.get("stage_errors", []),
