@@ -42,6 +42,7 @@ def run_diagnosis(state: BugifyState) -> Dict[str, Any]:
             "error_message": result.get("error_message"),
             "error_file": result.get("file"),
             "error_line": result.get("line"),
+            "code_line": result.get("code_line"),
             "relevant_files": result.get("relevant_files", []),
             "current_stage": "diagnosis",
             "stage_errors": [],
@@ -122,12 +123,22 @@ def run_fix(state: BugifyState) -> Dict[str, Any]:
     logger.info("[Node] fix_agent")
     try:
         agent = FixAgent()
+        code_ctx = dict(state.get("ast_analysis", {}))
+        error_file = state.get("error_file")
+        code_line = state.get("code_line")
+        rel_files = state.get("relevant_files", [])
+        target_f = error_file or (rel_files[0] if rel_files else "service.py")
+        if target_f not in code_ctx or not code_ctx[target_f].get("source"):
+            code_ctx[target_f] = {
+                "source": f"# Context around failure:\n{code_line or state.get('problem')}"
+            }
+
         result = agent.fix(
             problem=state["problem"],
             traceback=state.get("traceback", ""),
             root_cause=state.get("root_cause"),
-            relevant_files=state.get("relevant_files", []),
-            code_context=state.get("ast_analysis", {}),
+            relevant_files=rel_files or [target_f],
+            code_context=code_ctx,
             retrieved_context=state.get("retrieved_context", []),
         )
         patch = result.get("patch", "")

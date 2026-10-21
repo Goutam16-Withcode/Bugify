@@ -183,13 +183,13 @@ RELEVANT FILES
 CODE ANALYSIS
 ============================================================
 
-{code_context}
+{formatted_code_context}
 
 ============================================================
 RETRIEVED KNOWLEDGE
 ============================================================
 
-{context or "No external knowledge was retrieved."}
+{formatted_retrieved_context or "No external knowledge was retrieved."}
 
 ============================================================
 PATCH GENERATION RULES

@@ -43,6 +43,7 @@ class DiagnosisAgent:
             "file": parsed_error.get("file"),
             "line": parsed_error.get("line"),
             "function": parsed_error.get("function"),
+            "code_line": parsed_error.get("code_line"),
 
             "relevant_files": relevant_files,
 
