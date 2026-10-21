@@ -613,17 +613,17 @@ function parseRootCause(text) {
   let failureMode = '';
   let mitigationCode = '';
 
-  const codeMatch = text.match(/```(?:python)?\s*([\s\S]*?)```/i);
+  const codeMatch = text.match(/```(?:python|sql)?\s*([\s\S]*?)```/i);
   if (codeMatch) {
     mitigationCode = codeMatch[1].trim();
   }
 
-  const textWithoutCode = text.replace(/```(?:python)?[\s\S]*?```/gi, '').trim();
+  const textWithoutCode = text.replace(/```(?:python|sql)?[\s\S]*?```/gi, '').trim();
 
-  const rcMatch = textWithoutCode.match(/###\s*Root Cause\s*([\s\S]*?)(?=###|$)/i);
+  const rcMatch = textWithoutCode.match(/###\s*Root Cause[:\s]*([\s\S]*?)(?=###\s*Primary Failure Mode|###\s*Production Mitigation|###|$)/i);
   if (rcMatch) rootCause = rcMatch[1].trim();
 
-  const fmMatch = textWithoutCode.match(/###\s*Primary Failure Mode\s*([\s\S]*?)(?=###|$)/i);
+  const fmMatch = textWithoutCode.match(/###\s*Primary Failure Mode[:\s]*([\s\S]*?)(?=###\s*Production Mitigation|###|$)/i);
   if (fmMatch) failureMode = fmMatch[1].trim();
 
   if (!rootCause && !failureMode) {
@@ -631,6 +631,33 @@ function parseRootCause(text) {
   }
 
   return { rootCause, failureMode, mitigationCode };
+}
+
+function formatInlineMarkdown(text) {
+  if (!text) return null;
+  const cleaned = text.replace(/^###\s*[^\n]+\n?/i, '').trim();
+  const parts = cleaned.split(/(`[^`]+`)/g);
+  return parts.map((part, idx) => {
+    if (part.startsWith('`') && part.endsWith('`')) {
+      return (
+        <code
+          key={idx}
+          style={{
+            background: 'rgba(255, 255, 255, 0.08)',
+            color: '#fbbf24',
+            padding: '2px 6px',
+            borderRadius: '4px',
+            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: '0.85em',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+          }}
+        >
+          {part.slice(1, -1)}
+        </code>
+      );
+    }
+    return part;
+  });
 }
 
 function detectErrorType(errType, rootCause, description, traceback) {

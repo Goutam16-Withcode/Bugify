@@ -461,6 +461,8 @@
   font-size: 0.88rem;
   color: #e5e5e5;
   line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 .diagCodeContainer {
   background: #0d1117;
