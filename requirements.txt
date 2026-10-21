@@ -29,6 +29,7 @@ GitPython
 
 fastapi
 uvicorn
+gunicorn
 pydantic
 pydantic-settings
 python-dotenv
