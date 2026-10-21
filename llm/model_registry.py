@@ -9,11 +9,12 @@ load_dotenv()
 _REGISTRY: dict[str, type] = {}
 
 
-def _get_groq(model: str = "llama-3.3-70b-versatile", temperature: float = 0.0) -> BaseChatModel:
+def _get_groq(model: str = "openai/gpt-oss-120b", temperature: float = 0.0) -> BaseChatModel:
     api_key = os.getenv("GROQ_API_KEY", "")
     if not api_key:
         raise EnvironmentError("GROQ_API_KEY is not set in environment / .env")
-    return ChatGroq(model=model, temperature=temperature, api_key=api_key)
+    selected_model = os.getenv("GROQ_MODEL") or model
+    return ChatGroq(model=selected_model, temperature=temperature, api_key=api_key)
 
 
 def _get_openai(model: str = "gpt-4o", temperature: float = 0.0) -> BaseChatModel:
