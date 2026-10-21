@@ -1169,44 +1169,69 @@ export default function DebugPage() {
                 )}
 
                 {/* Tab 3: Performance & Big-O Profiler */}
-                {activeTab === 'complexity' && (
-                  <div className={styles.tabContent}>
-                    <div className={styles.complexityGrid}>
-                      <div className={styles.complexityCard}>
-                        <div className={styles.complexityLabel}>Time Complexity Shift</div>
-                        <div className={styles.complexityShift}>
-                          <span style={{ color: '#f87171' }}>{result.complexity_analysis?.time_complexity_before || 'O(1)'}</span>
-                          <span style={{ color: '#737373' }}>→</span>
-                          <span style={{ color: '#4ade80' }}>{result.complexity_analysis?.time_complexity_after || 'O(1)'}</span>
+                {activeTab === 'complexity' && (() => {
+                  const combinedCode = `${result.patch || ''} ${result.diagnosis?.root_cause || ''} ${description || ''}`;
+                  const effectiveHints = getEffectiveComplexityHints(result.complexity_analysis?.optimization_hints, combinedCode);
+                  const isNetwork = combinedCode.toLowerCase().includes('requests.') || combinedCode.toLowerCase().includes('gateway') || combinedCode.toLowerCase().includes('http');
+                  const latency = (result.complexity_analysis?.latency_overhead_estimated && !result.complexity_analysis?.latency_overhead_estimated.includes('< 0.05ms'))
+                    ? result.complexity_analysis.latency_overhead_estimated
+                    : isNetwork
+                    ? '~50ms - 150ms (External Network RTT)'
+                    : '< 0.05ms';
+
+                  return (
+                    <div className={styles.tabContent}>
+                      <div className={styles.complexityGrid}>
+                        <div className={styles.complexityCard}>
+                          <div className={styles.complexityLabel}>Time Complexity Shift</div>
+                          <div className={styles.complexityShift}>
+                            <span style={{ color: '#f87171' }}>{result.complexity_analysis?.time_complexity_before || 'O(1)'}</span>
+                            <span style={{ color: '#737373' }}>→</span>
+                            <span style={{ color: '#4ade80' }}>{result.complexity_analysis?.time_complexity_after || 'O(1)'}</span>
+                          </div>
+                        </div>
+
+                        <div className={styles.complexityCard}>
+                          <div className={styles.complexityLabel}>Space Complexity</div>
+                          <div className={styles.complexityVal}>
+                            {result.complexity_analysis?.space_complexity || 'O(1)'}
+                          </div>
+                        </div>
+
+                        <div className={styles.complexityCard}>
+                          <div className={styles.complexityLabel}>Impact Rating</div>
+                          <div className={styles.complexityVal} style={{ color: '#4ade80' }}>
+                            {result.complexity_analysis?.impact_rating || 'OPTIMAL'}
+                          </div>
                         </div>
                       </div>
 
-                      <div className={styles.complexityCard}>
-                        <div className={styles.complexityLabel}>Space Complexity</div>
-                        <div className={styles.complexityVal}>
-                          {result.complexity_analysis?.space_complexity || 'O(1)'}
+                      <div className={styles.diagBlock}>
+                        <div className={styles.diagBlockLabel}>
+                          <span>⚡</span> Algorithmic Bottleneck Analysis
                         </div>
-                      </div>
+                        <div style={{ fontSize: '0.85rem', color: '#e5e5e5', lineHeight: 1.65 }}>
+                          <div style={{ marginBottom: 10 }}>
+                            Estimated Latency Overhead:{' '}
+                            <strong style={{ color: isNetwork ? '#fbbf24' : '#4ade80' }}>
+                              {latency}
+                            </strong>
+                          </div>
 
-                      <div className={styles.complexityCard}>
-                        <div className={styles.complexityLabel}>Impact Rating</div>
-                        <div className={styles.complexityVal} style={{ color: '#4ade80' }}>
-                          {result.complexity_analysis?.impact_rating || 'OPTIMAL'}
+                          <div style={{ fontSize: '0.74rem', textTransform: 'uppercase', color: '#737373', fontWeight: 800, marginBottom: 8 }}>
+                            Performance & Execution Profiling:
+                          </div>
+                          {effectiveHints.map((h, i) => (
+                            <div key={i} className={styles.assertionChip} style={{ marginBottom: 6 }}>
+                              <span style={{ color: '#38bdf8' }}>●</span>
+                              <span>{h}</span>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </div>
-
-                    <div className={styles.diagBlock}>
-                      <div className={styles.diagBlockLabel}>Algorithmic Bottleneck Analysis</div>
-                      <div style={{ fontSize: '0.82rem', color: '#d4d4d4', lineHeight: 1.6 }}>
-                        Estimated Latency Overhead: <strong style={{ color: '#4ade80' }}>{result.complexity_analysis?.latency_overhead_estimated || '< 0.05ms'}</strong>.
-                        {(result.complexity_analysis?.optimization_hints || ['Constant time evaluation with minimal memory footprint.']).map((h, i) => (
-                          <div key={i} style={{ marginTop: 6, color: '#a3a3a3' }}>• {h}</div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 {/* Tab 4: Self-Healing Test Suite */}
                 {activeTab === 'tests' && (
